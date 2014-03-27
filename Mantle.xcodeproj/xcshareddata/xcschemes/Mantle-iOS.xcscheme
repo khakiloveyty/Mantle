@@ -28,8 +28,8 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "D042FC8615F72BC7004E8054"
-               BuildableName = "Mantle-iOS Tests.octest"
+               BlueprintIdentifier = "DB2D96F918E48DF6004D327B"
+               BuildableName = "Mantle-iOS Tests.xctest"
                BlueprintName = "Mantle-iOS Tests"
                ReferencedContainer = "container:Mantle.xcodeproj">
             </BuildableReference>
@@ -46,8 +46,8 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "D042FC8615F72BC7004E8054"
-               BuildableName = "Mantle-iOS Tests.octest"
+               BlueprintIdentifier = "DB2D96F918E48DF6004D327B"
+               BuildableName = "Mantle-iOS Tests.xctest"
                BlueprintName = "Mantle-iOS Tests"
                ReferencedContainer = "container:Mantle.xcodeproj">
             </BuildableReference>
