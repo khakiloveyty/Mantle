@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "D042FC7815F72BC7004E8054"
-               BuildableName = "libMantle-iOS.a"
+               BuildableName = "libMantle.a"
                BlueprintName = "Mantle-iOS"
                ReferencedContainer = "container:Mantle.xcodeproj">
             </BuildableReference>
