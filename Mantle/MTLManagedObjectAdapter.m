@@ -8,7 +8,6 @@
 
 #import <objc/runtime.h>
 
-#import "EXTScope.h"
 #import "EXTRuntimeExtensions.h"
 #import "MTLManagedObjectAdapter.h"
 #import "MTLModel.h"
@@ -274,11 +273,11 @@ static id performInContext(NSManagedObjectContext *context, id (^block)(void)) {
 	CFMutableDictionaryRef processedObjects = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
 	if (processedObjects == NULL) return nil;
 
-	@onExit {
-		CFRelease(processedObjects);
-	};
+	id ret = [self modelOfClass:modelClass fromManagedObject:managedObject processedObjects:processedObjects error:error];
 
-	return [self modelOfClass:modelClass fromManagedObject:managedObject processedObjects:processedObjects error:error];
+	CFRelease(processedObjects);
+
+	return ret;
 }
 
 + (id)modelOfClass:(Class)modelClass fromManagedObject:(NSManagedObject *)managedObject processedObjects:(CFMutableDictionaryRef)processedObjects error:(NSError **)error {
@@ -557,11 +556,11 @@ static id performInContext(NSManagedObjectContext *context, id (^block)(void)) {
 	CFMutableDictionaryRef processedObjects = CFDictionaryCreateMutable(NULL, 0, &keyCallbacks, &kCFTypeDictionaryValueCallBacks);
 	if (processedObjects == NULL) return nil;
 
-	@onExit {
-		CFRelease(processedObjects);
-	};
+	id ret = [self managedObjectFromModel:model insertingIntoContext:context processedObjects:processedObjects error:error];
 
-	return [self managedObjectFromModel:model insertingIntoContext:context processedObjects:processedObjects error:error];
+	CFRelease(processedObjects);
+
+	return ret;
 }
 
 + (id)managedObjectFromModel:(id<MTLManagedObjectSerializing>)model insertingIntoContext:(NSManagedObjectContext *)context processedObjects:(CFMutableDictionaryRef)processedObjects error:(NSError **)error {
@@ -673,9 +672,6 @@ static id performInContext(NSManagedObjectContext *context, id (^block)(void)) {
 		if (property == NULL) continue;
 
 		mtl_propertyAttributes *attributes = mtl_copyPropertyAttributes(property);
-		@onExit {
-			free(attributes);
-		};
 
 		NSValueTransformer *transformer = nil;
 
@@ -688,6 +684,8 @@ static id performInContext(NSManagedObjectContext *context, id (^block)(void)) {
 		}
 
 		if (transformer != nil) result[key] = transformer;
+
+		free(attributes);
 	}
 
 	return result;

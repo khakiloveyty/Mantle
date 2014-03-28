@@ -8,7 +8,6 @@
 
 #import "MTLModel+NSCoding.h"
 #import "EXTRuntimeExtensions.h"
-#import "EXTScope.h"
 #import "MTLReflection.h"
 
 // Used in archives to store the modelVersion of the archived instance.
@@ -71,12 +70,11 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 		NSAssert(property != NULL, @"Could not find property \"%@\" on %@", key, self);
 
 		mtl_propertyAttributes *attributes = mtl_copyPropertyAttributes(property);
-		@onExit {
-			free(attributes);
-		};
 
 		MTLModelEncodingBehavior behavior = (attributes->weak ? MTLModelEncodingBehaviorConditional : MTLModelEncodingBehaviorUnconditional);
 		behaviors[key] = @(behavior);
+
+		free(attributes);
 	}
 
 	return behaviors;
@@ -98,21 +96,17 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 		NSAssert(property != NULL, @"Could not find property \"%@\" on %@", key, self);
 
 		mtl_propertyAttributes *attributes = mtl_copyPropertyAttributes(property);
-		@onExit {
-			free(attributes);
-		};
 
 		// If the property is not of object or class type, assume that it's
 		// a primitive which would be boxed into an NSValue.
 		if (attributes->type[0] != '@' && attributes->type[0] != '#') {
 			allowedClasses[key] = @[ NSValue.class ];
-			continue;
-		}
-
-		// Omit this property from the dictionary if its class isn't known.
-		if (attributes->objectClass != nil) {
+		} else if (attributes->objectClass != nil) {
+			// Omit this property from the dictionary if its class isn't known.
 			allowedClasses[key] = @[ attributes->objectClass ];
 		}
+
+		free(attributes);
 	}
 
 	// It doesn't really matter if we replace another thread's work, since we do
