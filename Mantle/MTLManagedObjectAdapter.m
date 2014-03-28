@@ -8,11 +8,11 @@
 
 #import <objc/runtime.h>
 
-#import "EXTRuntimeExtensions.h"
 #import "MTLManagedObjectAdapter.h"
 #import "MTLModel.h"
 #import "MTLTransformerErrorHandling.h"
 #import "MTLReflection.h"
+#import "MTLPropertyAttributes.h"
 #import "NSArray+MTLManipulationAdditions.h"
 #import "NSValueTransformer+MTLPredefinedTransformerAdditions.h"
 
@@ -667,25 +667,21 @@ static id performInContext(NSManagedObjectContext *context, id (^block)(void)) {
 			continue;
 		}
 
-		objc_property_t property = class_getProperty(modelClass, key.UTF8String);
+		MTLPropertyAttributes *attributes = [MTLPropertyAttributes propertyNamed:key class:modelClass];
 
-		if (property == NULL) continue;
-
-		mtl_propertyAttributes *attributes = mtl_copyPropertyAttributes(property);
+		if (attributes == nil) continue;
 
 		NSValueTransformer *transformer = nil;
 
-		if (attributes->objectClass != nil) {
-			transformer = [self transformerForModelPropertiesOfClass:attributes->objectClass];
+		if (attributes.objectClass != nil) {
+			transformer = [self transformerForModelPropertiesOfClass:attributes.objectClass];
 		}
 
-		if (transformer == nil && attributes->type != NULL) {
-			transformer = [self transformerForModelPropertiesOfObjCType:attributes->type];
+		if (transformer == nil && attributes.type != NULL) {
+			transformer = [self transformerForModelPropertiesOfObjCType:attributes.type];
 		}
 
 		if (transformer != nil) result[key] = transformer;
-
-		free(attributes);
 	}
 
 	return result;
