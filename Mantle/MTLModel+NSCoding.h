@@ -30,7 +30,7 @@ typedef enum : NSUInteger {
 //
 // This will decode the original +modelVersion of the archived object, then
 // invoke -decodeValueForKey:withCoder:modelVersion: for each of the receiver's
-// +propertyKeys.
+// property keys.
 //
 // Returns an initialized model object, or nil if a decoding error occurred.
 - (id)initWithCoder:(NSCoder *)coder;
@@ -41,7 +41,7 @@ typedef enum : NSUInteger {
 // according to the behaviors specified in +encodingBehaviorsByPropertyKey.
 - (void)encodeWithCoder:(NSCoder *)coder;
 
-// Determines how the +propertyKeys of the class are encoded into an archive.
+// Determines how the property keys of the class are encoded into an archive.
 // The values of this dictionary should be boxed MTLModelEncodingBehavior
 // values.
 //
@@ -50,7 +50,7 @@ typedef enum : NSUInteger {
 // Subclasses overriding this method should combine their values with those of
 // `super`.
 //
-// Returns a dictionary mapping the receiver's +propertyKeys to default encoding
+// Returns a dictionary mapping the receiver's property keys to default encoding
 // behaviors. If a property is an object with `weak` semantics, the default
 // behavior is MTLModelEncodingBehaviorConditional; otherwise, the default is
 // MTLModelEncodingBehaviorUnconditional.

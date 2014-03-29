@@ -15,6 +15,7 @@
 #import "MTLPropertyAttributes.h"
 #import "NSArray+MTLManipulationAdditions.h"
 #import "NSValueTransformer+MTLPredefinedTransformerAdditions.h"
+#import "NSDictionary+MTLMappingAdditions.h"
 
 NSString * const MTLManagedObjectAdapterErrorDomain = @"MTLManagedObjectAdapterErrorDomain";
 const NSInteger MTLManagedObjectAdapterErrorNoClassFound = 2;
@@ -646,9 +647,7 @@ static id performInContext(NSManagedObjectContext *context, id (^block)(void)) {
 	NSParameterAssert([modelClass isSubclassOfClass:MTLModel.class]);
 	NSParameterAssert([modelClass conformsToProtocol:@protocol(MTLManagedObjectSerializing)]);
 
-	NSMutableDictionary *result = [NSMutableDictionary dictionary];
-
-	for (NSString *key in [modelClass propertyKeys]) {
+	return [NSDictionary mtl_propertyKeyMapWithModel:modelClass usingBlock:^id(NSString *key, BOOL *stop) {
 		SEL selector = MTLSelectorWithKeyPattern(key, "EntityAttributeTransformer");
 		if ([self.modelClass respondsToSelector:selector]) {
 			NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[self.modelClass methodSignatureForSelector:selector]];
@@ -658,18 +657,16 @@ static id performInContext(NSManagedObjectContext *context, id (^block)(void)) {
 
 			__unsafe_unretained id transformer = nil;
 			[invocation getReturnValue:&transformer];
-			result[key] = transformer;
-			continue;
+			return transformer;
 		}
 
 		if ([self.modelClass respondsToSelector:@selector(entityAttributeTransformerForKey:)]) {
-			result[key] = [self.modelClass entityAttributeTransformerForKey:key];
-			continue;
+			return [self.modelClass entityAttributeTransformerForKey:key];
 		}
 
 		MTLPropertyAttributes *attributes = [MTLPropertyAttributes propertyNamed:key class:modelClass];
 
-		if (attributes == nil) continue;
+		if (attributes == nil) return nil;
 
 		NSValueTransformer *transformer = nil;
 
@@ -681,10 +678,8 @@ static id performInContext(NSManagedObjectContext *context, id (^block)(void)) {
 			transformer = [self transformerForModelPropertiesOfObjCType:attributes.type];
 		}
 
-		if (transformer != nil) result[key] = transformer;
-	}
-
-	return result;
+		return transformer;
+	}];
 }
 
 - (NSValueTransformer *)transformerForModelPropertiesOfClass:(Class)class {

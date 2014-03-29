@@ -9,6 +9,7 @@
 #import "MTLModel+NSCoding.h"
 #import "MTLReflection.h"
 #import "MTLPropertyAttributes.h"
+#import "NSDictionary+MTLMappingAdditions.h"
 #import <objc/runtime.h>
 
 // Used in archives to store the modelVersion of the archived instance.
@@ -63,42 +64,37 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 #pragma mark Encoding Behaviors
 
 + (NSDictionary *)encodingBehaviorsByPropertyKey {
-	NSSet *propertyKeys = self.propertyKeys;
-	NSMutableDictionary *behaviors = [[NSMutableDictionary alloc] initWithCapacity:propertyKeys.count];
-
-	for (NSString *key in propertyKeys) {
-		MTLPropertyAttributes *attributes = [MTLPropertyAttributes propertyNamed:key class:self];
+	return [NSDictionary mtl_propertyKeyMapWithModel:self usingBlock:^id(NSString *propertyName, BOOL *stop) {
+		MTLPropertyAttributes *attributes = [MTLPropertyAttributes propertyNamed:propertyName class:self];
 
 		MTLModelEncodingBehavior behavior = (attributes.memoryPolicy == MTLPropertyMemoryPolicyWeak ? MTLModelEncodingBehaviorConditional : MTLModelEncodingBehaviorUnconditional);
-		behaviors[key] = @(behavior);
-	}
-
-	return behaviors;
+		return @(behavior);
+	}];
 }
 
 + (NSDictionary *)allowedSecureCodingClassesByPropertyKey {
 	NSDictionary *cachedClasses = objc_getAssociatedObject(self, MTLModelCachedAllowedClassesKey);
 	if (cachedClasses != nil) return cachedClasses;
 
-	// Get all property keys that could potentially be encoded.
-	NSSet *propertyKeys = [self.encodingBehaviorsByPropertyKey keysOfEntriesPassingTest:^ BOOL (NSString *propertyKey, NSNumber *behavior, BOOL *stop) {
-		return behavior.unsignedIntegerValue != MTLModelEncodingBehaviorExcluded;
-	}];
+	NSDictionary *encodingBehaviors = self.encodingBehaviorsByPropertyKey;
+	NSDictionary *allowedClasses = [NSDictionary mtl_propertyKeyMapWithModel:self usingBlock:^id(NSString *key, BOOL *stop) {
+		if ([encodingBehaviors[key] unsignedIntegerValue] == MTLModelEncodingBehaviorExcluded) {
+			return nil;
+		}
 
-	NSMutableDictionary *allowedClasses = [[NSMutableDictionary alloc] initWithCapacity:propertyKeys.count];
-
-	for (NSString *key in propertyKeys) {
 		MTLPropertyAttributes *attributes = [MTLPropertyAttributes propertyNamed:key class:self];
 
 		// If the property is not of object or class type, assume that it's
 		// a primitive which would be boxed into an NSValue.
 		if (attributes.type[0] != '@' && attributes.type[0] != '#') {
-			allowedClasses[key] = @[ NSValue.class ];
+			return @[ NSValue.class ];
 		} else if (attributes.objectClass != nil) {
 			// Omit this property from the dictionary if its class isn't known.
-			allowedClasses[key] = @[ attributes.objectClass ];
+			return @[ attributes.objectClass ];
 		}
-	}
+
+		return nil;
+	}];
 
 	// It doesn't really matter if we replace another thread's work, since we do
 	// it atomically and the result should be the same.
@@ -177,15 +173,9 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 		}
 	}
 
-	NSSet *propertyKeys = self.class.propertyKeys;
-	NSMutableDictionary *dictionaryValue = [[NSMutableDictionary alloc] initWithCapacity:propertyKeys.count];
-
-	for (NSString *key in propertyKeys) {
-		id value = [self decodeValueForKey:key withCoder:coder modelVersion:version.unsignedIntegerValue];
-		if (value == nil) continue;
-
-		dictionaryValue[key] = value;
-	}
+	NSDictionary *dictionaryValue = [NSDictionary mtl_propertyKeyMapWithModel:self.class usingBlock:^(NSString *key, BOOL *stop) {
+		return [self decodeValueForKey:key withCoder:coder modelVersion:version.unsignedIntegerValue];
+	}];
 
 	NSError *error = nil;
 	self = [self initWithDictionary:dictionaryValue error:&error];

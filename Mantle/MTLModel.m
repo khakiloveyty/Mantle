@@ -23,6 +23,10 @@ static void *MTLModelCachedTransitoryPropertyKeysKey = &MTLModelCachedTransitory
 // property keys.
 static void *MTLModelCachedPermanentPropertyKeysKey = &MTLModelCachedPermanentPropertyKeysKey;
 
+// Associated in +generateAndCachePropertyKeys with a set of all permanent
+// property keys.
+static void *MTLModelCachedPropertyKeysSharedKeySetKey = &MTLModelCachedPropertyKeysSharedKeySetKey;
+
 // Validates a value for an object and sets it if necessary.
 //
 // obj         - The object for which the value is being validated. This value
@@ -152,7 +156,7 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 
 	// It doesn't really matter if we replace another thread's work, since we do
 	// it atomically and the result should be the same.
-	objc_setAssociatedObject(self, MTLModelCachedPropertyKeysKey, keys, OBJC_ASSOCIATION_COPY);
+	objc_setAssociatedObject(self, MTLModelCachedPropertyKeysKey, keys, OBJC_ASSOCIATION_RETAIN);
 
 	return keys;
 }
@@ -179,10 +183,30 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 	return permanentPropertyKeys;
 }
 
-- (NSDictionary *)dictionaryValue {
-	NSSet *keys = [self.class.transitoryPropertyKeys setByAddingObjectsFromSet:self.class.permanentPropertyKeys];
++ (id)sharedPropertyKeySet {
+	id sharedPropertyKeySet = objc_getAssociatedObject(self, MTLModelCachedPropertyKeysSharedKeySetKey);
+	if (sharedPropertyKeySet != nil) return sharedPropertyKeySet;
 
-	return [self dictionaryWithValuesForKeys:keys.allObjects];
+	sharedPropertyKeySet = [NSMutableDictionary sharedKeySetForKeys:self.propertyKeys.allObjects];
+
+	objc_setAssociatedObject(self, MTLModelCachedPropertyKeysSharedKeySetKey, sharedPropertyKeySet, OBJC_ASSOCIATION_RETAIN);
+
+	return sharedPropertyKeySet;
+
+}
+
+- (NSDictionary *)dictionaryValue {
+	NSMutableDictionary *dictionaryValue = [NSMutableDictionary dictionaryWithSharedKeySet:self.class.sharedPropertyKeySet];
+
+	for (NSString *key in self.class.transitoryPropertyKeys) {
+		dictionaryValue[key] = [self valueForKey:key] ?: NSNull.null;
+	}
+
+	for (NSString *key in self.class.permanentPropertyKeys) {
+		dictionaryValue[key] = [self valueForKey:key] ?: NSNull.null;
+	}
+
+	return [dictionaryValue copy];
 }
 
 + (MTLPropertyStorage)defaultStorageBehaviorForProperty:(MTLPropertyAttributes *)attributes {

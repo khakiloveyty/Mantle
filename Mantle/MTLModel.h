@@ -80,6 +80,10 @@ typedef enum : NSUInteger {
 // properties without ivars, or properties on MTLModel itself.
 + (NSSet *)propertyKeys;
 
+@optional
+
++ (id)sharedPropertyKeySet;
+
 @end
 
 // An abstract base class for model objects, using reflection to provide
