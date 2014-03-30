@@ -79,26 +79,6 @@
 	XCTAssertEqual(target.count, (NSUInteger)8);
 }
 
-- (void)testPrimitivePermanent
-{
-	XCTAssertEqual([MTLStorageBehaviorModel storageBehaviorForPropertyWithKey:@"primitive"], MTLPropertyStoragePermanent, @"Should consider primitive properties permanent");
-}
-
-- (void)testObjectAssignPermanent
-{
-	XCTAssertEqual([MTLStorageBehaviorModel storageBehaviorForPropertyWithKey:@"assignProperty"], MTLPropertyStoragePermanent, @"Should consider object-type assign properties permanent");
-}
-
-- (void)testObjectStrongPermanent
-{
-	XCTAssertEqual([MTLStorageBehaviorModel storageBehaviorForPropertyWithKey:@"strongProperty"], MTLPropertyStoragePermanent, @"Should consider object-type strong properties permanent");
-}
-
-- (void)testIgnoreDynamicReadonly
-{
-	XCTAssertEqual([MTLStorageBehaviorModel storageBehaviorForPropertyWithKey:@"notIvarBacked"], MTLPropertyStorageNone, @"Should ignore readonly properties without backing ivar");
-}
-
 @end
 
 @interface MTLModelBasicDictionaryTestCase : XCTestCase
