@@ -188,10 +188,7 @@
 						name = sel_registerName(selectorString);
 					} else {
 						size_t selectorLength = nextFlag - next;
-						if (!selectorLength) {
-							fprintf(stderr, "ERROR: Found zero length selector name in attribute string \"%s\" for property %s\n", attrString, property_getName(property));
-							return (self = nil);
-						}
+						NSAssert(selectorLength, @"Found zero length selector name in attribute string \"%s\" for property %@.", attrString, propertyName);
 
 						char selectorString[selectorLength + 1];
 
@@ -248,7 +245,7 @@
 		}
 
 		if (next && *next != '\0') {
-			fprintf(stderr, "Warning: Unparsed data \"%s\" in attribute string \"%s\" for property %s\n", next, attrString, property_getName(property));
+			NSLog(@"Warning: Unparsed data \"%s\" in attribute string \"%s\" for property %@.", next, attrString, propertyName);
 		}
 
 		if (!_getter) {
