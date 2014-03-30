@@ -39,38 +39,28 @@ typedef NS_ENUM(int8_t, MTLPropertyMemoryPolicy) {
 @interface MTLPropertyAttributes : NSObject
 
 /**
- Enumerates properties for the given class hierarchy, starting at the given
- class, and continuing up until (but not including) a given class.
+ Enumerates the names of properties for the given class hierarchy, starting at
+ the given class, and continuing up until (but not including) a given class.
 
  The given block will be invoked multiple times for any properties declared on
  each class in the hierarchy.
  */
-+ (void)enumeratePropertiesOfClass:(Class)cls untilClass:(Class)endCls usingBlock:(void (^)(MTLPropertyAttributes *attributes))block;
-
-/**
- Checks all properties of the given class' hierarchy, starting at the given
- class, and continuing up until (but not including) a given class, for validity
- against a given block.
-
- The given block will be invoked multiple times for any properties declared on
- multiple classes in the hierarchy.
- */
-+ (NSSet *)namesOfPropertiesInClassHierarchy:(Class)cls untilClass:(Class)endCls passingTest:(BOOL (^)(NSString *propertyName))block;
++ (void)enumeratePropertyNamesOfClass:(Class)cls untilClass:(Class)endCls usingBlock:(void (^)(NSString *propertyName))block;
 
 /**
  Returns property attributes for a given property on a given class.
  */
-+ (instancetype)propertyNamed:(NSString *)propertyName class:(Class)cls;
++ (instancetype)propertyNamed:(NSString *)propertyName class:(Class)cls reusingAttributes:(inout MTLPropertyAttributes **)attributesRef;
 
 /**
  Returns property attributes for a given property on a given protocol.
  */
-+ (instancetype)propertyNamed:(NSString *)propertyName protocol:(Protocol *)proto;
++ (instancetype)propertyNamed:(NSString *)propertyName protocol:(Protocol *)proto reusingAttributes:(inout MTLPropertyAttributes **)attributesRef;
 
 /**
  * The name of this property.
  */
-@property (nonatomic, copy, readonly) NSString *name;
+@property (nonatomic, copy, readonly) NSString *propertyName;
 
 /**
  * Whether this property was declared with the \c readonly attribute.

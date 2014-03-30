@@ -647,6 +647,7 @@ static id performInContext(NSManagedObjectContext *context, id (^block)(void)) {
 	NSParameterAssert([modelClass isSubclassOfClass:MTLModel.class]);
 	NSParameterAssert([modelClass conformsToProtocol:@protocol(MTLManagedObjectSerializing)]);
 
+    __block MTLPropertyAttributes *reusedAttributes = nil;
 	return [NSDictionary mtl_propertyKeyMapWithModel:modelClass usingBlock:^id(NSString *key, BOOL *stop) {
 		SEL selector = MTLSelectorWithKeyPattern(key, "EntityAttributeTransformer");
 		if ([self.modelClass respondsToSelector:selector]) {
@@ -664,7 +665,7 @@ static id performInContext(NSManagedObjectContext *context, id (^block)(void)) {
 			return [self.modelClass entityAttributeTransformerForKey:key];
 		}
 
-		MTLPropertyAttributes *attributes = [MTLPropertyAttributes propertyNamed:key class:modelClass];
+		MTLPropertyAttributes *attributes = [MTLPropertyAttributes propertyNamed:key class:modelClass reusingAttributes:&reusedAttributes];
 
 		if (attributes == nil) return nil;
 

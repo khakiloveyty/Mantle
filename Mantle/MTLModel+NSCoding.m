@@ -64,8 +64,9 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 #pragma mark Encoding Behaviors
 
 + (NSDictionary *)encodingBehaviorsByPropertyKey {
+	__block MTLPropertyAttributes *reusedAttributes = nil;
 	return [NSDictionary mtl_propertyKeyMapWithModel:self usingBlock:^id(NSString *propertyName, BOOL *stop) {
-		MTLPropertyAttributes *attributes = [MTLPropertyAttributes propertyNamed:propertyName class:self];
+		MTLPropertyAttributes *attributes = [MTLPropertyAttributes propertyNamed:propertyName class:self reusingAttributes:&reusedAttributes];
 
 		MTLModelEncodingBehavior behavior = (attributes.memoryPolicy == MTLPropertyMemoryPolicyWeak ? MTLModelEncodingBehaviorConditional : MTLModelEncodingBehaviorUnconditional);
 		return @(behavior);
@@ -76,13 +77,14 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 	NSDictionary *cachedClasses = objc_getAssociatedObject(self, MTLModelCachedAllowedClassesKey);
 	if (cachedClasses != nil) return cachedClasses;
 
+	__block MTLPropertyAttributes *reusedAttributes = nil;
 	NSDictionary *encodingBehaviors = self.encodingBehaviorsByPropertyKey;
 	NSDictionary *allowedClasses = [NSDictionary mtl_propertyKeyMapWithModel:self usingBlock:^id(NSString *key, BOOL *stop) {
 		if ([encodingBehaviors[key] unsignedIntegerValue] == MTLModelEncodingBehaviorExcluded) {
 			return nil;
 		}
 
-		MTLPropertyAttributes *attributes = [MTLPropertyAttributes propertyNamed:key class:self];
+		MTLPropertyAttributes *attributes = [MTLPropertyAttributes propertyNamed:key class:self reusingAttributes:&reusedAttributes];
 
 		// If the property is not of object or class type, assume that it's
 		// a primitive which would be boxed into an NSValue.

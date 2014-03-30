@@ -49,7 +49,7 @@
 
 - (void)testPropertyAttributesForBOOL {
 	MTLPropertyAttributes *attributes = nil;
-	XCTAssertNoThrow(attributes = [MTLPropertyAttributes propertyNamed:@"normalBool" class:RuntimeTestClass.class]);
+	XCTAssertNoThrow(attributes = [MTLPropertyAttributes propertyNamed:@"normalBool" class:RuntimeTestClass.class reusingAttributes:NULL]);
 	XCTAssertNotNil(attributes);
 
 	XCTAssertTrue(attributes.readonly);
@@ -73,7 +73,7 @@
 
 - (void)testPropertyAttributesForArray {
 	MTLPropertyAttributes *attributes = nil;
-	XCTAssertNoThrow(attributes = [MTLPropertyAttributes propertyNamed:@"array" class:RuntimeTestClass.class]);
+	XCTAssertNoThrow(attributes = [MTLPropertyAttributes propertyNamed:@"array" class:RuntimeTestClass.class reusingAttributes:NULL]);
 	XCTAssertNotNil(attributes);
 
 	XCTAssertFalse(attributes.readonly);
@@ -97,7 +97,7 @@
 
 - (void)testPropertyAttributesForNormalString {
 	MTLPropertyAttributes *attributes = nil;
-	XCTAssertNoThrow(attributes = [MTLPropertyAttributes propertyNamed:@"normalString" class:RuntimeTestClass.class]);
+	XCTAssertNoThrow(attributes = [MTLPropertyAttributes propertyNamed:@"normalString" class:RuntimeTestClass.class reusingAttributes:NULL]);
 	XCTAssertNotNil(attributes);
 
 	XCTAssertFalse(attributes.readonly);
@@ -121,7 +121,7 @@
 
 - (void)testPropertyAttributesForUntypedObject {
 	MTLPropertyAttributes *attributes = nil;
-	XCTAssertNoThrow(attributes = [MTLPropertyAttributes propertyNamed:@"untypedObject" class:RuntimeTestClass.class]);
+	XCTAssertNoThrow(attributes = [MTLPropertyAttributes propertyNamed:@"untypedObject" class:RuntimeTestClass.class reusingAttributes:NULL]);
 	XCTAssertNotNil(attributes);
 
 	XCTAssertFalse(attributes.readonly);
@@ -167,13 +167,13 @@
 
 - (void)testPropertyAttributesForWeakObject {
 	MTLPropertyAttributes *attributes = nil;
-	XCTAssertNoThrow(attributes = [MTLPropertyAttributes propertyNamed:@"weakObject" class:RuntimeTestClass.class]);
+	XCTAssertNoThrow(attributes = [MTLPropertyAttributes propertyNamed:@"weakObject" class:RuntimeTestClass.class reusingAttributes:NULL]);
 	[self commonTestPropertyAttributesForWeakObject:attributes];
 }
 
 - (void)testPropertyAttributesForWeakObjectInProtocol {
 	MTLPropertyAttributes *attributes = nil;
-	XCTAssertNoThrow(attributes = [MTLPropertyAttributes propertyNamed:@"weakObject" protocol:@protocol(RuntimeTestProtocol)]);
+	XCTAssertNoThrow(attributes = [MTLPropertyAttributes propertyNamed:@"weakObject" protocol:@protocol(RuntimeTestProtocol) reusingAttributes:NULL]);
 	[self commonTestPropertyAttributesForWeakObject:attributes];
 }
 

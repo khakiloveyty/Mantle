@@ -94,6 +94,7 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 	IMP theirIMP = method_getImplementation(class_getClassMethod(MTLModel.class, selector));
 	BOOL implements = (myIMP != theirIMP);
 
+	__block MTLPropertyAttributes *attributes = nil;
 	[MTLPropertyAttributes enumeratePropertyNamesOfClass:self untilClass:MTLModel.class usingBlock:^(NSString *propertyKey) {
 		MTLPropertyStorage storage = MTLPropertyStorageInvalid;
 
@@ -102,7 +103,7 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 		}
 
 		if (storage == MTLPropertyStorageInvalid) {
-			MTLPropertyAttributes *thisAttr = [MTLPropertyAttributes propertyNamed:propertyKey class:self];
+			MTLPropertyAttributes *thisAttr = [MTLPropertyAttributes propertyNamed:propertyKey class:self reusingAttributes:&attributes];
 			storage = [self defaultStorageBehaviorForProperty:thisAttr];
 		}
 
