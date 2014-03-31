@@ -199,11 +199,11 @@ extern const NSInteger MTLJSONAdapterErrorInvalidJSONDictionary;
 
 @class MTLModel;
 
-@interface MTLJSONAdapter (Deprecated)
+@interface MTLJSONAdapter (Superseded)
 
 @property (nonatomic, strong, readonly) id<MTLJSONSerializing> model __attribute__((unavailable("Replaced by -modelFromJSONDictionary:error:")));
 
-+ (NSDictionary *)JSONDictionaryFromModel:(MTLModel<MTLJSONSerializing> *)model __attribute__((deprecated("Replaced by +JSONDictionaryFromModel:error:")));
++ (NSDictionary *)JSONDictionaryFromModel:(MTLModel<MTLJSONSerializing> *)model __attribute__((unavailable("Replaced by +JSONDictionaryFromModel:error:")));
 
 - (NSDictionary *)JSONDictionary __attribute__((unavailable("Replaced by -JSONDictionaryFromModel:error:")));
 
@@ -212,7 +212,5 @@ extern const NSInteger MTLJSONAdapterErrorInvalidJSONDictionary;
 - (id)initWithJSONDictionary:(NSDictionary *)JSONDictionary modelClass:(Class)modelClass error:(NSError **)error __attribute__((unavailable("Replaced by -initWithModelClass:")));
 
 - (id)initWithModel:(id<MTLJSONSerializing>)model __attribute__((unavailable("Replaced by -initWithModelClass:")));
-
-- (NSDictionary *)serializeToJSONDictionary:(NSError **)error __attribute__((unavailable("Replaced by -JSONDictionaryFromModel:error:")));
 
 @end

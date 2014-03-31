@@ -116,35 +116,3 @@
 }
 
 @end
-
-
-@implementation MTLValueTransformer (Deprecated)
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-implementations"
-
-+ (instancetype)transformerWithBlock:(id (^)(id))transformationBlock {
-	return [self transformerUsingForwardBlock:^(id value, BOOL *success, NSError **error) {
-		return transformationBlock(value);
-	}];
-}
-
-+ (instancetype)reversibleTransformerWithBlock:(id (^)(id))transformationBlock {
-	return [self transformerUsingReversibleBlock:^(id value, BOOL *success, NSError **error) {
-		return transformationBlock(value);
-	}];
-}
-
-+ (instancetype)reversibleTransformerWithForwardBlock:(id (^)(id))forwardBlock reverseBlock:(id (^)(id))reverseBlock {
-	return [self
-		transformerUsingForwardBlock:^(id value, BOOL *success, NSError **error) {
-			return forwardBlock(value);
-		}
-		reverseBlock:^(id value, BOOL *success, NSError **error) {
-			return reverseBlock(value);
-		}];
-}
-
-#pragma clang diagnostic pop
-
-@end
