@@ -196,6 +196,7 @@ static inline NSString *MTLPropertyAttributesCopyName(objc_property_t property) 
 
 	_property = property;
 
+	_memoryPolicy = MTLPropertyMemoryPolicyAssign;
 	bzero(&_flags, sizeof(_flags));
 	_getter = NULL;
 	_setter = NULL;
@@ -203,7 +204,6 @@ static inline NSString *MTLPropertyAttributesCopyName(objc_property_t property) 
 	_objectClass = Nil;
 
 	if (_property == NULL) {
-		_memoryPolicy = MTLPropertyMemoryPolicyAssign;
 		_typeString = nil;
 		return;
 	}
