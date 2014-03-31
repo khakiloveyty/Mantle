@@ -143,22 +143,4 @@
 	XCTAssertEqual(unarchivedModel.count, (NSUInteger)5);
 }
 
-- (void)testOldFormat
-{
-	NSURL *archiveURL = [[NSBundle bundleForClass:self.class] URLForResource:@"MTLTestModel-OldArchive" withExtension:@"plist"];
-	XCTAssertNotNil(archiveURL);
-
-	MTLTestModel *unarchivedModel = [NSKeyedUnarchiver unarchiveObjectWithFile:archiveURL.path];
-	XCTAssertNotNil(unarchivedModel);
-
-	NSDictionary *expectedValues = @{
-		@"name": @"foobar",
-		@"count": @5,
-		@"nestedName": @"fuzzbuzz",
-		@"weakModel": NSNull.null,
-	};
-	
-	XCTAssertEqualObjects(unarchivedModel.dictionaryValue, expectedValues);
-}
-
 @end
