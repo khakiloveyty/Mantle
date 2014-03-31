@@ -7,7 +7,6 @@
 //
 
 #import "MTLCoreDataTestModels.h"
-#import "NSDictionary+MTLMappingAdditions.h"
 
 NSString * const MTLCoreDataTestModelsDomain = @"MTLCoreDataTestModelsDomain";
 
