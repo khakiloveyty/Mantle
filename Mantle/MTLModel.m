@@ -136,7 +136,7 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 
 - (instancetype)init {
 	// Nothing special by default, but we have a declaration in the header.
-	return [super init];
+	return (self = [super init]);
 }
 
 - (instancetype)initWithDictionary:(NSDictionary *)dictionary error:(NSError **)error {
@@ -270,7 +270,7 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 - (NSString *)description {
 	NSDictionary *permanentProperties = [self dictionaryWithValuesForKeys:self.class.permanentPropertyKeys.allObjects];
 
-	return [NSString stringWithFormat:@"<%@: %p> %@", self.class, self, permanentProperties];
+	return [NSString stringWithFormat:@"<%@: %p> %@", self.class, (__bridge void *)self, permanentProperties];
 }
 
 - (NSUInteger)hash {

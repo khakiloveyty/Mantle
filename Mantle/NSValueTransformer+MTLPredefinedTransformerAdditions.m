@@ -94,7 +94,7 @@ NSString * const MTLBooleanValueTransformerName = @"MTLBooleanValueTransformerNa
 					*success = NO;
 					return nil;
 				}
-				return (NSNumber *)(boolean.boolValue ? kCFBooleanTrue : kCFBooleanFalse);
+				return boolean.boolValue ? @YES : @NO;
 			}];
 
 		[NSValueTransformer setValueTransformer:booleanValueTransformer forName:MTLBooleanValueTransformerName];
