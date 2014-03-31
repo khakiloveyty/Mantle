@@ -190,7 +190,8 @@ static id performInContext(NSManagedObjectContext *context, id (^block)(void)) {
 		BOOL (^deserializeRelationship)(NSRelationshipDescription *) = ^(NSRelationshipDescription *relationshipDescription) {
 			Class nestedClass = self.relationshipModelClassesByPropertyKey[propertyKey];
 			if (nestedClass == nil) {
-				[NSException raise:NSInvalidArgumentException format:@"No class specified for decoding relationship at key \"%@\" in managed object %@", managedObjectKey, managedObject];
+				NSString *reason = [NSString stringWithFormat:@"No class specified for decoding relationship at key \"%@\" in managed object %@", managedObjectKey, managedObject];
+				@throw [NSException exceptionWithName:NSInvalidArgumentException reason:reason userInfo:nil];
 			}
 
 			if ([relationshipDescription isToMany]) {
