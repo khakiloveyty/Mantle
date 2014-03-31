@@ -361,7 +361,7 @@ static id performInContext(NSManagedObjectContext *context, id (^block)(void)) {
 				return nil;
 			}
 
-			return results.mtl_firstObject;
+			return results.firstObject;
 		});
 
 		if (encountedError && error != NULL) {

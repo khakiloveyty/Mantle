@@ -21,15 +21,6 @@
 	expected = nil;
 }
 
-- (void)testFirstObject
-{
-	array = @[ @1, @2, @3 ];
-	XCTAssertEqualObjects(array.mtl_firstObject, @1, @"Should return the first object");
-
-	array = @[];
-	XCTAssertNil(array.mtl_firstObject, @"Should return nil for an empty array");
-}
-
 - (void)testArrayByRemovingObject
 {
 	array = @[ @1, @2, @3 ];
