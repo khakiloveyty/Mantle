@@ -581,7 +581,7 @@ static id performInContext(NSManagedObjectContext *context, id (^block)(void)) {
 - (NSValueTransformer *)entityAttributeTransformerForKey:(NSString *)key {
 	NSParameterAssert(key != nil);
 
-	SEL selector = MTLSelectorWithKeyPattern(key, "EntityAttributeTransformer");
+	SEL selector = MTLSelectorWithKeyPattern(NULL, key, "EntityAttributeTransformer");
 	if ([self.modelClass respondsToSelector:selector]) {
 		NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[self.modelClass methodSignatureForSelector:selector]];
 		invocation.target = self.modelClass;
@@ -649,7 +649,7 @@ static id performInContext(NSManagedObjectContext *context, id (^block)(void)) {
 
     __block MTLPropertyAttributes *reusedAttributes = nil;
 	return [NSDictionary mtl_propertyKeyMapWithModel:modelClass usingBlock:^id(NSString *key, BOOL *stop) {
-		SEL selector = MTLSelectorWithKeyPattern(key, "EntityAttributeTransformer");
+		SEL selector = MTLSelectorWithKeyPattern(NULL, key, "EntityAttributeTransformer");
 		if ([self.modelClass respondsToSelector:selector]) {
 			NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[self.modelClass methodSignatureForSelector:selector]];
 			invocation.target = self.modelClass;
@@ -686,7 +686,7 @@ static id performInContext(NSManagedObjectContext *context, id (^block)(void)) {
 - (NSValueTransformer *)transformerForModelPropertiesOfClass:(Class)class {
 	NSParameterAssert(class != nil);
 
-	SEL selector = MTLSelectorWithKeyPattern(NSStringFromClass(class), "EntityAttributeTransformer");
+	SEL selector = MTLSelectorWithKeyPattern(NULL, NSStringFromClass(class), "EntityAttributeTransformer");
 	if (![self respondsToSelector:selector]) return nil;
 
 	NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[self methodSignatureForSelector:selector]];
