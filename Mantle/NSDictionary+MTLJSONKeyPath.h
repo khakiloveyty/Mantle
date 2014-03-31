@@ -15,13 +15,15 @@
 // JSONKeyPath - The key path that should be resolved. Every element along this
 //               key path needs to be an instance of NSDictionary for the
 //               resolving to be successful.
+// obj         - On return, this will be set to the value for the key path,
+//               which may be nil.
 // success     - If not NULL, this will be set to a boolean indicating whether
 //               the key path was resolved successfully.
 // error       - If not NULL, this may be set to an error that occurs during
 //               resolving the value.
 //
-// Returns the value for the key path which may be nil. Clients should inspect
-// the success parameter to decide how to proceed with the result.
-- (id)mtl_valueForJSONKeyPath:(NSString *)JSONKeyPath success:(BOOL *)success error:(NSError **)error;
+// Returns a boolean indicating whether the key path was resolved successfully.
+// Clients should inspect it to decide if to proceed with the returned object.
+- (BOOL)mtl_getObjectValue:(out id *)obj forJSONKeyPath:(NSString *)JSONKeyPath error:(NSError **)error;
 
 @end

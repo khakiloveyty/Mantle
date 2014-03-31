@@ -12,7 +12,7 @@
 
 @implementation NSDictionary (MTLJSONKeyPath)
 
-- (id)mtl_valueForJSONKeyPath:(NSString *)JSONKeyPath success:(BOOL *)success error:(NSError **)error {
+- (BOOL)mtl_getObjectValue:(out id *)obj forJSONKeyPath:(NSString *)JSONKeyPath error:(NSError **)error {
 	NSArray *components = [JSONKeyPath componentsSeparatedByString:@"."];
 
 	id result = self;
@@ -31,17 +31,17 @@
 				*error = [NSError errorWithDomain:MTLJSONAdapterErrorDomain code:MTLJSONAdapterErrorInvalidJSONDictionary userInfo:userInfo];
 			}
 
-			if (success != NULL) *success = NO;
+			if (obj != NULL) *obj = nil;
 
-			return nil;
+			return NO;
 		}
 
 		result = result[component];
 	}
 
-	if (success != NULL) *success = YES;
+	if (obj != NULL) *obj = result;
 
-	return result;
+	return YES;
 }
 
 @end
