@@ -76,7 +76,7 @@
 	NSEntityDescription *childEntity = [NSEntityDescription entityForName:@"BadChild" inManagedObjectContext:context];
 	XCTAssertNotNil(childEntity);
 
-	MTLParentTestModel *parentModel = [MTLParentTestModel modelWithDictionary:@{
+	MTLParentTestModel *parentModel = [[MTLParentTestModel alloc] initWithDictionary:@{
 		@"date": [NSDate date],
 		@"numberString": @"1234",
 		@"requiredString": @"foobar"
@@ -86,7 +86,7 @@
 	NSMutableArray *orderedChildren = [NSMutableArray array];
 
 	for (NSUInteger i = 3; i < 6; i++) {
-		MTLBadChildTestModel *child = [MTLBadChildTestModel modelWithDictionary:@{
+		MTLBadChildTestModel *child = [[MTLBadChildTestModel alloc] initWithDictionary:@{
 			@"childID": @(i)
 		} error:NULL];
 		XCTAssertNotNil(child);
@@ -215,7 +215,7 @@
 {
 	[super setUp];
 
-	parentModel = [MTLParentTestModel modelWithDictionary:@{
+	parentModel = [[MTLParentTestModel alloc] initWithDictionary:@{
 		@"date": [NSDate date],
 		@"numberString": @"1234",
 		@"requiredString": @"foobar"
@@ -226,7 +226,7 @@
 	NSMutableSet *unorderedChildren = [NSMutableSet set];
 
 	for (NSUInteger i = 0; i < 3; i++) {
-		MTLChildTestModel *child = [MTLChildTestModel modelWithDictionary:@{
+		MTLChildTestModel *child = [[MTLChildTestModel alloc] initWithDictionary:@{
 			@"childID": @(i),
 			@"parent2": parentModel
 		} error:NULL];
@@ -236,7 +236,7 @@
 	}
 
 	for (NSUInteger i = 3; i < 6; i++) {
-		MTLChildTestModel *child = [MTLChildTestModel modelWithDictionary:@{
+		MTLChildTestModel *child = [[MTLChildTestModel alloc] initWithDictionary:@{
 			@"childID": @(i),
 			@"parent1": parentModel
 		} error:NULL];
@@ -299,7 +299,7 @@
 
 - (void)testInsertFail
 {
-	MTLFailureModel *failureModel = [MTLFailureModel modelWithDictionary:@{
+	MTLFailureModel *failureModel = [[MTLFailureModel alloc] initWithDictionary:@{
 		@"notSupported": @"foobar"
 	} error:NULL];
 
@@ -312,7 +312,7 @@
 
 - (void)testValidateAttributeFail
 {
-	MTLParentTestModel *failureModel = [MTLParentTestModel modelWithDictionary:@{} error:NULL];
+	MTLParentTestModel *failureModel = [[MTLParentTestModel alloc] initWithDictionary:@{} error:NULL];
 
 	NSError *error = nil;
 	NSManagedObject *managedObject = [MTLManagedObjectAdapter managedObjectFromModel:failureModel insertingIntoContext:context error:&error];
@@ -323,7 +323,7 @@
 
 - (void)testValidateForInsertFail
 {
-	MTLParentIncorrectTestModel *failureModel = [MTLParentIncorrectTestModel modelWithDictionary:@{} error:NULL];
+	MTLParentIncorrectTestModel *failureModel = [[MTLParentIncorrectTestModel alloc] initWithDictionary:@{} error:NULL];
 
 	NSError *error = nil;
 	NSManagedObject *managedObject = [MTLManagedObjectAdapter managedObjectFromModel:failureModel insertingIntoContext:context error:&error];

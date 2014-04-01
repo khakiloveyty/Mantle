@@ -138,10 +138,6 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 	objc_setAssociatedObject(self, MTLModelCachedPropertyKeysKey, permanentKeys, OBJC_ASSOCIATION_COPY);
 }
 
-+ (instancetype)modelWithDictionary:(NSDictionary *)dictionary error:(NSError **)error {
-	return [[self alloc] initWithDictionary:dictionary error:error];
-}
-
 - (instancetype)init {
 	// Nothing special by default, but we have a declaration in the header.
 	return (self = [super init]);
