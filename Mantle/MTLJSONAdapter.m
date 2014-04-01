@@ -184,7 +184,7 @@ static NSString * const MTLJSONAdapterThrownExceptionErrorKey = @"MTLJSONAdapter
 	NSDictionary *JSONKeyPathsByPropertyKey = [self JSONKeyPathsByPropertyKeyForModelClass:modelClass];
 	NSDictionary *valueTransformersByPropertyKey = [self valueTransformersForModelClass:modelClass];
 
-	NSDictionary *dictionaryValue = [NSDictionary mtl_propertyKeyMapWithModel:modelClass usingBlock:^id(NSString *propertyKey, BOOL *stop) {
+	NSDictionary *dictionaryValue = MTLCopyPropertyKeyMapUsingBlock(modelClass, ^id(NSString *propertyKey, BOOL *stop) {
 		id JSONKeyPaths = JSONKeyPathsByPropertyKey[propertyKey];
 
 		if (JSONKeyPaths == nil) return nil;
@@ -259,7 +259,7 @@ static NSString * const MTLJSONAdapterThrownExceptionErrorKey = @"MTLJSONAdapter
 			return nil;
 #endif
 		}
-	}];
+	});
 
 	if (!dictionaryValue) {
 		return nil;
@@ -273,7 +273,7 @@ static NSString * const MTLJSONAdapterThrownExceptionErrorKey = @"MTLJSONAdapter
 	NSParameterAssert([modelClass conformsToProtocol:@protocol(MTLJSONSerializing)]);
 
 	__block MTLPropertyAttributes *reusedAttributes = nil;
-	return [NSDictionary mtl_propertyKeyMapWithModel:modelClass usingBlock:^id(NSString *key, BOOL *stop) {
+	return MTLCopyPropertyKeyMapUsingBlock(modelClass, ^id(NSString *key, BOOL *stop) {
 		SEL selector = MTLSelectorWithKeyPattern(NULL, key, "JSONTransformer");
 		if ([modelClass respondsToSelector:selector]) {
 			NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[modelClass methodSignatureForSelector:selector]];
@@ -305,7 +305,7 @@ static NSString * const MTLJSONAdapterThrownExceptionErrorKey = @"MTLJSONAdapter
 		}
 
 		return [self transformerForModelPropertiesOfObjCType:attributes.type] ?: [NSValueTransformer mtl_validatingTransformerForClass:NSValue.class];
-	}];
+	});
 }
 
 - (NSDictionary *)JSONKeyPathsByPropertyKeyForModelClass:(Class)modelClass {

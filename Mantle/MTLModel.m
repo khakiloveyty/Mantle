@@ -21,10 +21,6 @@ static void *MTLModelCachedPropertyKeysKey = &MTLModelCachedPropertyKeysKey;
 // property keys.
 static void *MTLModelCachedPermanentPropertyKeysKey = &MTLModelCachedPermanentPropertyKeysKey;
 
-// Associated in +generateAndCachePropertyKeys with a set of all permanent
-// property keys.
-static void *MTLModelCachedPropertyKeysSharedKeySetKey = &MTLModelCachedPropertyKeysSharedKeySetKey;
-
 // Validates a value for an object and sets it if necessary.
 //
 // obj         - The object for which the value is being validated. This value
@@ -71,6 +67,11 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 
 @interface MTLModel ()
 
+// Inspects all properties of this class, inferring the property storage if not
+// given by a subclass implementation of +storageBehaviorForPropertyWithKey,
+// and calls the given block.
++ (void)enumeratePropertiesUsingBlock:(void(^)(NSString *propertyKey, MTLPropertyStorage storage))block __attribute__((nonnull(1)));
+
 // Inspects all properties of returned by +propertyKeys using
 // +storageBehaviorForPropertyWithKey and caches the results.
 + (void)generateAndCachePropertyKeys;
@@ -85,10 +86,8 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 
 #pragma mark Lifecycle
 
-+ (void)generateAndCachePropertyKeys {
-	NSMutableSet *transitoryKeys = [NSMutableSet set];
-	NSMutableSet *permanentKeys = [NSMutableSet set];
-
++ (void)enumeratePropertiesUsingBlock:(void(^)(NSString *propertyKey, MTLPropertyStorage storage))block
+{
 	SEL selector = @selector(storageBehaviorForPropertyWithKey:);
 	IMP myIMP = method_getImplementation(class_getClassMethod(self, selector));
 	IMP theirIMP = method_getImplementation(class_getClassMethod(MTLModel.class, selector));
@@ -107,6 +106,15 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 			storage = [self defaultStorageBehaviorForProperty:thisAttr];
 		}
 
+		block(propertyKey, storage);
+	}];
+}
+
++ (void)generateAndCachePropertyKeys {
+	NSMutableSet *transitoryKeys = [NSMutableSet set];
+	NSMutableSet *permanentKeys = [NSMutableSet set];
+
+	[self enumeratePropertiesUsingBlock:^(NSString *propertyKey, MTLPropertyStorage storage) {
 		switch (storage) {
 			case MTLPropertyStorageNone:
 				break;
@@ -182,26 +190,10 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 	return permanentPropertyKeys;
 }
 
-+ (id)sharedPropertyKeySet {
-	id sharedPropertyKeySet = objc_getAssociatedObject(self, MTLModelCachedPropertyKeysSharedKeySetKey);
-	if (sharedPropertyKeySet != nil) return sharedPropertyKeySet;
-
-	sharedPropertyKeySet = [NSMutableDictionary sharedKeySetForKeys:self.propertyKeys.allObjects];
-
-	objc_setAssociatedObject(self, MTLModelCachedPropertyKeysSharedKeySetKey, sharedPropertyKeySet, OBJC_ASSOCIATION_RETAIN);
-
-	return sharedPropertyKeySet;
-
-}
-
 - (NSDictionary *)dictionaryValue {
-	NSMutableDictionary *dictionaryValue = [NSMutableDictionary dictionaryWithSharedKeySet:self.class.sharedPropertyKeySet];
-
-	for (NSString *key in self.class.propertyKeys) {
-		dictionaryValue[key] = [self valueForKey:key] ?: NSNull.null;
-	}
-
-	return [dictionaryValue copy];
+	return MTLCopyPropertyKeyMapUsingBlock(self.class, ^(NSString *key, BOOL *stop) {
+		return [self valueForKey:key] ?: NSNull.null;
+	});
 }
 
 + (MTLPropertyStorage)defaultStorageBehaviorForProperty:(MTLPropertyAttributes *)attributes {
@@ -241,7 +233,7 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 }
 
 - (void)mergeValuesForKeysFromModel:(id<MTLModel>)model {
-	for (NSString *key in self.class.propertyKeys) {
+	for (NSString *key in MTLGetPropertyKeysEnumerable(self.class)) {
 		[self mergeValueForKey:key fromModel:model];
 	}
 }
@@ -249,7 +241,7 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 #pragma mark Validation
 
 - (BOOL)validate:(NSError **)error {
-	for (NSString *key in self.class.propertyKeys) {
+	for (NSString *key in MTLGetPropertyKeysEnumerable(self.class)) {
 		id value = [self valueForKey:key];
 
 		BOOL success = MTLValidateAndSetValue(self, key, value, NO, error);

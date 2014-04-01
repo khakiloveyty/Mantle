@@ -52,12 +52,12 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 
 + (NSDictionary *)encodingBehaviorsByPropertyKey {
 	__block MTLPropertyAttributes *reusedAttributes = nil;
-	return [NSDictionary mtl_propertyKeyMapWithModel:self usingBlock:^id(NSString *propertyName, BOOL *stop) {
+	return MTLCopyPropertyKeyMapUsingBlock(self, ^id(NSString *propertyName, BOOL *stop) {
 		MTLPropertyAttributes *attributes = [MTLPropertyAttributes propertyNamed:propertyName class:self reusingAttributes:&reusedAttributes];
 
 		MTLModelEncodingBehavior behavior = (attributes.memoryPolicy == MTLPropertyMemoryPolicyWeak ? MTLModelEncodingBehaviorConditional : MTLModelEncodingBehaviorUnconditional);
 		return @(behavior);
-	}];
+	});
 }
 
 + (NSDictionary *)allowedSecureCodingClassesByPropertyKey {
@@ -66,7 +66,7 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 
 	__block MTLPropertyAttributes *reusedAttributes = nil;
 	NSDictionary *encodingBehaviors = self.encodingBehaviorsByPropertyKey;
-	NSDictionary *allowedClasses = [NSDictionary mtl_propertyKeyMapWithModel:self usingBlock:^id(NSString *key, BOOL *stop) {
+	NSDictionary *allowedClasses = MTLCopyPropertyKeyMapUsingBlock(self, ^id(NSString *key, BOOL *stop) {
 		if ([encodingBehaviors[key] unsignedIntegerValue] == MTLModelEncodingBehaviorExcluded) {
 			return nil;
 		}
@@ -83,7 +83,7 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 		}
 
 		return nil;
-	}];
+	});
 
 	// It doesn't really matter if we replace another thread's work, since we do
 	// it atomically and the result should be the same.
@@ -147,9 +147,9 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 		verifyAllowedClassesByPropertyKey(self.class);
 	}
 
-	NSDictionary *dictionaryValue = [NSDictionary mtl_propertyKeyMapWithModel:self.class usingBlock:^(NSString *key, BOOL *stop) {
+	NSDictionary *dictionaryValue = MTLCopyPropertyKeyMapUsingBlock(self.class, ^(NSString *key, BOOL *stop) {
 		return [self decodeValueForKey:key withCoder:coder modelVersion:version.unsignedIntegerValue];
-	}];
+	});
 
 	NSError *error = nil;
 	self = [self initWithDictionary:dictionaryValue error:&error];

@@ -163,7 +163,7 @@ static id performInContext(NSManagedObjectContext *context, id (^block)(void)) {
 		return YES;
 	};
 
-	for (NSString *propertyKey in [self.modelClass propertyKeys]) {
+	for (NSString *propertyKey in MTLGetPropertyKeysEnumerable(self.modelClass)) {
 		NSString *managedObjectKey = self.managedObjectKeysByPropertyKey[propertyKey];
 		if (managedObjectKey == nil) continue;
 
@@ -649,7 +649,7 @@ static id performInContext(NSManagedObjectContext *context, id (^block)(void)) {
 	NSParameterAssert([modelClass conformsToProtocol:@protocol(MTLManagedObjectSerializing)]);
 
     __block MTLPropertyAttributes *reusedAttributes = nil;
-	return [NSDictionary mtl_propertyKeyMapWithModel:modelClass usingBlock:^id(NSString *key, BOOL *stop) {
+	return MTLCopyPropertyKeyMapUsingBlock(modelClass, ^id(NSString *key, BOOL *stop) {
 		SEL selector = MTLSelectorWithKeyPattern(NULL, key, "EntityAttributeTransformer");
 		if ([self.modelClass respondsToSelector:selector]) {
 			NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[self.modelClass methodSignatureForSelector:selector]];
@@ -681,7 +681,7 @@ static id performInContext(NSManagedObjectContext *context, id (^block)(void)) {
 		}
 
 		return transformer;
-	}];
+	});
 }
 
 - (NSValueTransformer *)transformerForModelPropertiesOfClass:(Class)class {
