@@ -7,6 +7,7 @@
 //
 
 #import "MTLTestModel.h"
+#import "MTLTestJSONAdapter.h"
 
 @interface MTLJSONAdapterTests : XCTestCase
 @end
@@ -110,6 +111,21 @@
 	XCTAssertNotNil(error);
 	XCTAssertEqualObjects(error.domain, MTLJSONAdapterErrorDomain);
 	XCTAssertEqual(error.code, MTLJSONAdapterErrorInvalidJSONDictionary);
+}
+
+- (void)testDeserializeIllegalJSONMapping
+{
+	values = @{
+		@"username": @"foo"
+	};
+
+	NSError *error = nil;
+	MTLIllegalJSONMappingModel *model = [MTLJSONAdapter modelOfClass:MTLIllegalJSONMappingModel.class fromJSONDictionary:values error:&error];
+	XCTAssertNil(model);
+
+	XCTAssertNotNil(error);
+	XCTAssertEqualObjects(error.domain, MTLJSONAdapterErrorDomain);
+	XCTAssertEqual(error.code, MTLJSONAdapterErrorInvalidJSONMapping);
 }
 
 - (void)testDeserializeKeypathsAcrossArrays
@@ -255,6 +271,34 @@
 	XCTAssertEqualObjects(error.userInfo[MTLTransformerErrorHandlingInputValueErrorKey], @"Potentially");
 };
 
+- (void)testFilterSerializedPropertyKeys
+{
+	values = @{
+		@"username": @"foo",
+		@"count": @"5",
+		@"nested": @{ @"name": NSNull.null }
+	};
+
+	MTLTestJSONAdapter *adapter = [[MTLTestJSONAdapter alloc] initWithModelClass:MTLTestModel.class];
+
+	NSError *error;
+	MTLTestModel *model = [adapter modelFromJSONDictionary:values error:&error];
+	XCTAssertNotNil(model);
+	XCTAssertNil(error);
+
+	NSDictionary *complete = [adapter JSONDictionaryFromModel:model error:&error];
+
+	XCTAssertEqualObjects(complete, values);
+	XCTAssertNil(error);
+
+	adapter.ignoredPropertyKeys = [NSSet setWithObjects:@"count", @"nestedName", nil];
+
+	NSDictionary *partial = [adapter JSONDictionaryFromModel:model error:&error];
+
+	XCTAssertEqualObjects(partial, (@{ @"username": @"foo" }));
+	XCTAssertNil(error);
+}
+
 - (void)testDeserializeIdProperty
 {
 	values = @{
@@ -306,6 +350,36 @@
 	XCTAssertNil(error);
 };
 
+- (void)testSerializeClassCluster
+{
+	MTLJSONAdapter *adapter = [[MTLJSONAdapter alloc] initWithModelClass:MTLClassClusterModel.class];
+
+	MTLChocolateClassClusterModel *chocolate = [[MTLChocolateClassClusterModel alloc] initWithDictionary:@{
+		@"bitterness": @100
+	} error:NULL];
+
+	NSError *error = nil;
+	NSDictionary *chocolateValues = [adapter JSONDictionaryFromModel:chocolate error:&error];
+
+	XCTAssertNil(error);
+	XCTAssertEqualObjects(chocolateValues, (@{
+		@"flavor": @"chocolate",
+		@"chocolate_bitterness": @"100"
+	}));
+
+	MTLStrawberryClassClusterModel *strawberry = [[MTLStrawberryClassClusterModel alloc] initWithDictionary:@{
+		@"freshness": @20
+	} error:NULL];
+
+	NSDictionary *strawberryValues = [adapter JSONDictionaryFromModel:strawberry error:&error];
+
+	XCTAssertNil(error);
+	XCTAssertEqualObjects(strawberryValues, (@{
+		@"flavor": @"strawberry",
+		@"strawberry_freshness": @20
+	}));
+}
+
 - (void)testParseNonMantleModel
 {
 	values = @{
@@ -329,6 +403,87 @@
 	XCTAssertNotNil(error);
 	XCTAssertEqualObjects(error.domain, MTLJSONAdapterErrorDomain);
 	XCTAssertEqual(error.code, MTLJSONAdapterErrorNoClassFound);
+}
+
+- (void)testDeserializeMultipleModels
+{
+	NSDictionary *value1 = @{
+		@"username": @"foo"
+	};
+
+	NSDictionary *value2 = @{
+		@"username": @"bar"
+	};
+
+	NSArray *JSONModels = @[ value1, value2 ];
+
+	NSError *error = nil;
+	NSArray *mantleModels = [MTLJSONAdapter modelsOfClass:MTLTestModel.class fromJSONArray:JSONModels error:&error];
+
+	XCTAssertNil(error);
+	XCTAssertNotNil(mantleModels);
+	XCTAssertEqual(mantleModels.count, (NSUInteger)2);
+	XCTAssertEqualObjects([mantleModels[0] name], @"foo");
+	XCTAssertEqualObjects([mantleModels[1] name], @"bar");
+}
+
+- (void)testDeserializeMultipleModelsNullError
+{
+	NSDictionary *value1 = @{
+		@"username": @"foo"
+	};
+
+	NSDictionary *value2 = @{
+		@"username": @"bar"
+	};
+
+	NSArray *JSONModels = @[ value1, value2 ];
+
+	NSError *error = nil;
+	NSArray *expected = [MTLJSONAdapter modelsOfClass:MTLTestModel.class fromJSONArray:JSONModels error:&error];
+	NSArray *models = [MTLJSONAdapter modelsOfClass:MTLTestModel.class fromJSONArray:JSONModels error:NULL];
+
+	XCTAssertEqualObjects(models, expected);
+}
+
+- (void)testFirstFailArray
+{
+	NSDictionary *value1 = @{
+		@"username": @"foo",
+		@"count": @"1",
+	};
+
+	NSDictionary *value2 = @{
+		@"count": @[ @"This won't parse" ],
+	};
+
+	NSArray *JSONModels = @[ value1, value2 ];
+
+	NSError *error = nil;
+	NSArray *mantleModels = [MTLJSONAdapter modelsOfClass:MTLSubstitutingTestModel.class fromJSONArray:JSONModels error:&error];
+	XCTAssertNil(mantleModels);
+
+	XCTAssertNotNil(error);
+	XCTAssertEqualObjects(error.domain, MTLJSONAdapterErrorDomain);
+	XCTAssertEqual(error.code, MTLJSONAdapterErrorNoClassFound);
+}
+
+- (void)testArray
+{
+	MTLTestModel *model1 = [[MTLTestModel alloc] init];
+	model1.name = @"foo";
+
+	MTLTestModel *model2 = [[MTLTestModel alloc] init];
+	model2.name = @"bar";
+
+	NSError *error = nil;
+	NSArray *JSONArray = [MTLJSONAdapter JSONArrayFromModels:@[ model1, model2 ] error:&error];
+
+	XCTAssertNil(error);
+	XCTAssertNotNil(JSONArray);
+	XCTAssertEqual(JSONArray.count, (NSUInteger)2);
+	XCTAssertEqualObjects(JSONArray[0][@"username"], @"foo");
+	XCTAssertEqualObjects(JSONArray[1][@"username"], @"bar");
 }
 
 @end

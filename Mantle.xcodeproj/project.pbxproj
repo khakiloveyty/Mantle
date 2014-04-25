@@ -78,8 +78,8 @@
 		DB0070CD18E49E8B00E96F6F /* MTLDictionaryManipulationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DB0070CB18E49E8B00E96F6F /* MTLDictionaryManipulationTests.m */; };
 		DB0070CE18E4A52800E96F6F /* TestModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = D021D936170F806B00C37E36 /* TestModel.xcdatamodeld */; };
 		DB0070CF18E4A52800E96F6F /* TestModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = D021D936170F806B00C37E36 /* TestModel.xcdatamodeld */; };
-		DB0070D218E4A53000E96F6F /* MTLTestNotificationObserver.m in Sources */ = {isa = PBXBuildFile; fileRef = D064BA331613BA75004CA27A /* MTLTestNotificationObserver.m */; };
-		DB0070D318E4A53100E96F6F /* MTLTestNotificationObserver.m in Sources */ = {isa = PBXBuildFile; fileRef = D064BA331613BA75004CA27A /* MTLTestNotificationObserver.m */; };
+		DB0070D218E4A53000E96F6F /* (null) in Sources */ = {isa = PBXBuildFile; };
+		DB0070D318E4A53100E96F6F /* (null) in Sources */ = {isa = PBXBuildFile; };
 		DB0070D418E4A53600E96F6F /* MTLCoreDataObjects.m in Sources */ = {isa = PBXBuildFile; fileRef = 542921C717D750EB00AE432B /* MTLCoreDataObjects.m */; };
 		DB0070D518E4A53600E96F6F /* MTLCoreDataTestModels.m in Sources */ = {isa = PBXBuildFile; fileRef = D021D943170F878E00C37E36 /* MTLCoreDataTestModels.m */; };
 		DB0070D618E4A53600E96F6F /* MTLTestModel.m in Sources */ = {isa = PBXBuildFile; fileRef = D0760EC815FFCA4E0060F550 /* MTLTestModel.m */; };
@@ -115,6 +115,8 @@
 		DB00718618E5E34800E96F6F /* MTLPropertyAttributesTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DB00718418E5E34800E96F6F /* MTLPropertyAttributesTests.m */; };
 		DB2D96E518E48DE3004D327B /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0A56B581804B04900A84EDC /* XCTest.framework */; };
 		DB2D96FB18E48DF6004D327B /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0A56B581804B04900A84EDC /* XCTest.framework */; };
+		DBE7900A190AF3A3000DDE66 /* MTLTestJSONAdapter.m in Sources */ = {isa = PBXBuildFile; fileRef = 54314BCF18ED78A6006F7517 /* MTLTestJSONAdapter.m */; };
+		DBE7900B190AF3A3000DDE66 /* MTLTestJSONAdapter.m in Sources */ = {isa = PBXBuildFile; fileRef = 54314BCF18ED78A6006F7517 /* MTLTestJSONAdapter.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -139,6 +141,8 @@
 		1ED5B5CF163A4E3C0072668E /* NSObject+MTLComparisonAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+MTLComparisonAdditions.m"; sourceTree = "<group>"; };
 		542921C617D750EB00AE432B /* MTLCoreDataObjects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTLCoreDataObjects.h; sourceTree = "<group>"; };
 		542921C717D750EB00AE432B /* MTLCoreDataObjects.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTLCoreDataObjects.m; sourceTree = "<group>"; };
+		54314BCE18ED78A6006F7517 /* MTLTestJSONAdapter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTLTestJSONAdapter.h; sourceTree = "<group>"; };
+		54314BCF18ED78A6006F7517 /* MTLTestJSONAdapter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTLTestJSONAdapter.m; sourceTree = "<group>"; };
 		547165A31801977000E734DB /* MTLTransformerErrorHandling.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTLTransformerErrorHandling.h; sourceTree = "<group>"; };
 		547F78531822BCFD00BBAB7B /* NSDictionary+MTLMappingAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+MTLMappingAdditions.h"; sourceTree = "<group>"; };
 		547F78541822BCFD00BBAB7B /* NSDictionary+MTLMappingAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+MTLMappingAdditions.m"; sourceTree = "<group>"; };
@@ -166,8 +170,6 @@
 		D042FC7915F72BC7004E8054 /* libMantle.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libMantle.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		D058FE1D16EFB3D2009DFB47 /* MTLReflection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTLReflection.h; sourceTree = "<group>"; };
 		D058FE1E16EFB3D2009DFB47 /* MTLReflection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTLReflection.m; sourceTree = "<group>"; };
-		D064BA321613BA75004CA27A /* MTLTestNotificationObserver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTLTestNotificationObserver.h; sourceTree = "<group>"; };
-		D064BA331613BA75004CA27A /* MTLTestNotificationObserver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTLTestNotificationObserver.m; sourceTree = "<group>"; };
 		D0760E7615FFBF330060F550 /* MTLModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTLModel.h; sourceTree = "<group>"; };
 		D0760E7715FFBF330060F550 /* MTLModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MTLModel.m; sourceTree = "<group>"; };
 		D0760EC715FFCA4E0060F550 /* MTLTestModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MTLTestModel.h; sourceTree = "<group>"; };
@@ -342,8 +344,8 @@
 				D021D943170F878E00C37E36 /* MTLCoreDataTestModels.m */,
 				D0760EC715FFCA4E0060F550 /* MTLTestModel.h */,
 				D0760EC815FFCA4E0060F550 /* MTLTestModel.m */,
-				D064BA321613BA75004CA27A /* MTLTestNotificationObserver.h */,
-				D064BA331613BA75004CA27A /* MTLTestNotificationObserver.m */,
+				54314BCE18ED78A6006F7517 /* MTLTestJSONAdapter.h */,
+				54314BCF18ED78A6006F7517 /* MTLTestJSONAdapter.m */,
 				D0C92DE115F72F6A00387438 /* MantleTests-Prefix.pch */,
 				D042FC5D15F72B23004E8054 /* MantleTests-Info.plist */,
 				D021D936170F806B00C37E36 /* TestModel.xcdatamodeld */,
@@ -659,13 +661,14 @@
 				DB0070DB18E4A55B00E96F6F /* MTLErrorModelExceptionTests.m in Sources */,
 				DB0070E718E4BB1500E96F6F /* MTLModelTests.m in Sources */,
 				DB0070F318E4BB4E00E96F6F /* MTLValueTransformerInversionAdditionsTests.m in Sources */,
-				DB0070D218E4A53000E96F6F /* MTLTestNotificationObserver.m in Sources */,
+				DB0070D218E4A53000E96F6F /* (null) in Sources */,
 				DB0070E418E4B8EF00E96F6F /* MTLModelNSCodingTests.m in Sources */,
 				DB0070CC18E49E8B00E96F6F /* MTLDictionaryManipulationTests.m in Sources */,
 				DB00718518E5E34800E96F6F /* MTLPropertyAttributesTests.m in Sources */,
 				DB0070CE18E4A52800E96F6F /* TestModel.xcdatamodeld in Sources */,
 				DB0070D618E4A53600E96F6F /* MTLTestModel.m in Sources */,
 				DB0070C918E49E7E00E96F6F /* MTLDictionaryMappingTests.m in Sources */,
+				DBE7900A190AF3A3000DDE66 /* MTLTestJSONAdapter.m in Sources */,
 				DB0070E118E4B0A200E96F6F /* MTLManagedObjectAdapterTests.m in Sources */,
 				DB0070C618E49CAE00E96F6F /* MTLComparisonAdditionsTests.m in Sources */,
 				DB0070ED18E4BB3000E96F6F /* MTLPredefinedTransformerAdditionsTests.m in Sources */,
@@ -685,13 +688,14 @@
 				DB0070DC18E4A55B00E96F6F /* MTLErrorModelExceptionTests.m in Sources */,
 				DB0070E818E4BB1500E96F6F /* MTLModelTests.m in Sources */,
 				DB0070F418E4BB4E00E96F6F /* MTLValueTransformerInversionAdditionsTests.m in Sources */,
-				DB0070D318E4A53100E96F6F /* MTLTestNotificationObserver.m in Sources */,
+				DB0070D318E4A53100E96F6F /* (null) in Sources */,
 				DB0070E518E4B8EF00E96F6F /* MTLModelNSCodingTests.m in Sources */,
 				DB0070CD18E49E8B00E96F6F /* MTLDictionaryManipulationTests.m in Sources */,
 				DB00718618E5E34800E96F6F /* MTLPropertyAttributesTests.m in Sources */,
 				DB0070CF18E4A52800E96F6F /* TestModel.xcdatamodeld in Sources */,
 				DB0070D918E4A53700E96F6F /* MTLTestModel.m in Sources */,
 				DB0070CA18E49E7E00E96F6F /* MTLDictionaryMappingTests.m in Sources */,
+				DBE7900B190AF3A3000DDE66 /* MTLTestJSONAdapter.m in Sources */,
 				DB0070E218E4B0A200E96F6F /* MTLManagedObjectAdapterTests.m in Sources */,
 				DB0070C718E49CAE00E96F6F /* MTLComparisonAdditionsTests.m in Sources */,
 				DB0070EE18E4BB3000E96F6F /* MTLPredefinedTransformerAdditionsTests.m in Sources */,

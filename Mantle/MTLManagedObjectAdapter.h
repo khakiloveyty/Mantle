@@ -115,6 +115,39 @@
 // nil to abort parsing (e.g., if the data is invalid).
 + (Class)classForDeserializingManagedObject:(NSManagedObject *)managedObject;
 
+// Overriden when merging the value of the given key on the receiver with the
+// value of the same key from the given `NSManagedObject` requires custom
+// handling.
+//
+// By default, this method is not implemented, and precedence will be given to
+// the value of the receiving model implicitly.
+//
+// When implemented, this method is called when an existing `NSManagedObject`
+// is found for the receiving model, before updating the `NSManagedObject`'s
+// properties.
+//
+// When implementing, you should use `+managedObjectKeysByPropertyKey` to map
+// the given `key` to the appropriate `NSManagedObject` property.
+- (void)mergeValueForKey:(NSString *)key fromManagedObject:(NSManagedObject *)managedObject;
+
+// Overriden when merging values on the receiver with the given
+// `NSManagedObject` requires custom handling.
+//
+// By default, this method is not implemented, and precedence will be given to
+// the values of the receiving model implicitly.
+//
+// When implemented, this method is called when an existing `NSManagedObject`
+// is found for the receiving model, before updating the `NSManagedObject`'s
+// properties.
+//
+// When implementing, you should use `+managedObjectKeysByPropertyKey` to map
+// the given `key` to the appropriate `NSManagedObject` property.
+//
+// If you have also implemented `mergeValueForKey:fromManagedObject:` you have
+// to make sure to call `mergeValueForKey:fromManagedObject:` from this method
+// when appropriate.
+- (void)mergeValuesForKeysFromManagedObject:(NSManagedObject *)managedObject;
+
 @end
 
 // The domain for errors originating from MTLManagedObjectAdapter.
@@ -147,6 +180,10 @@ extern const NSInteger MTLManagedObjectAdapterErrorUniqueFetchRequestFailed;
 // For a to-many relationship, this means that the property does not contain an
 // NSArray or NSSet of MTLModel<MTLManagedObjectSerializing> instances.
 extern const NSInteger MTLManagedObjectAdapterErrorUnsupportedRelationshipClass;
+
+// The model's implementation of +managedObjectKeysByPropertyKey included a key
+// which does not actually exist in +propertyKeys.
+extern const NSInteger MTLManagedObjectAdapterErrorInvalidManagedObjectMapping;
 
 // Converts a MTLModel object to and from an NSManagedObject.
 @interface MTLManagedObjectAdapter : NSObject
@@ -188,13 +225,13 @@ extern const NSInteger MTLManagedObjectAdapterErrorUnsupportedRelationshipClass;
 //         nil.
 //
 // Returns a value transformer or nil if no transformation should be used.
-- (NSValueTransformer *)transformerForModelPropertiesOfClass:(Class)class;
++ (NSValueTransformer *)transformerForModelPropertiesOfClass:(Class)class;
 
 // A value transformer that should be used for a properties of the given
 // primitive type.
 //
 // If `objCType` matches @encode(id), the value transformer returned by
-// -transformerForModelPropertiesOfClass: is used instead.
+// +transformerForModelPropertiesOfClass: is used instead.
 //
 // The default implementation simply returns nil.
 //
@@ -202,7 +239,7 @@ extern const NSInteger MTLManagedObjectAdapterErrorUnsupportedRelationshipClass;
 //            as it would be returned by the @encode() directive.
 //
 // Returns a value transformer or nil if no transformation should be used.
-- (NSValueTransformer *)transformerForModelPropertiesOfObjCType:(const char *)objCType;
++ (NSValueTransformer *)transformerForModelPropertiesOfObjCType:(const char *)objCType;
 
 @end
 
@@ -210,6 +247,6 @@ extern const NSInteger MTLManagedObjectAdapterErrorUnsupportedRelationshipClass;
 
 // This value transformer is used by MTLManagedObjectAdapter to automatically
 // convert NSURL properties to strings and vice versa.
-- (NSValueTransformer *)NSURLEntityAttributeTransformer;
++ (NSValueTransformer *)NSURLEntityAttributeTransformer;
 
 @end
