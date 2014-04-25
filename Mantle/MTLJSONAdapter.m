@@ -21,6 +21,7 @@
 NSString * const MTLJSONAdapterErrorDomain = @"MTLJSONAdapterErrorDomain";
 const NSInteger MTLJSONAdapterErrorNoClassFound = 2;
 const NSInteger MTLJSONAdapterErrorInvalidJSONDictionary = 3;
+const NSInteger MTLJSONAdapterErrorInvalidJSONMapping = 4;
 
 // An exception was thrown and caught.
 const NSInteger MTLJSONAdapterErrorExceptionThrown = 1;
@@ -61,10 +62,49 @@ static NSString * const MTLJSONAdapterThrownExceptionErrorKey = @"MTLJSONAdapter
 	return adapter.model;
 }
 
++ (NSArray *)modelsOfClass:(Class)modelClass fromJSONArray:(NSArray *)JSONArray error:(NSError **)error {
+	if (JSONArray == nil || ![JSONArray isKindOfClass:NSArray.class]) {
+		if (error != NULL) {
+			NSDictionary *userInfo = @{
+				NSLocalizedDescriptionKey: NSLocalizedString(@"Missing JSON array", @""),
+				NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:NSLocalizedString(@"%@ could not be created because an invalid JSON array was provided: %@", @""), NSStringFromClass(modelClass), JSONArray.class],
+			};
+			*error = [NSError errorWithDomain:MTLJSONAdapterErrorDomain code:MTLJSONAdapterErrorInvalidJSONDictionary userInfo:userInfo];
+		}
+		return nil;
+	}
+
+	NSMutableArray *models = [NSMutableArray arrayWithCapacity:JSONArray.count];
+	for (NSDictionary *JSONDictionary in JSONArray){
+		MTLModel *model = [self modelOfClass:modelClass fromJSONDictionary:JSONDictionary error:error];
+
+		if (model == nil) return nil;
+		
+		[models addObject:model];
+	}
+	
+	return models;
+}
+
 + (NSDictionary *)JSONDictionaryFromModel:(id<MTLJSONSerializing>)model error:(NSError **)error {
 	MTLJSONAdapter *adapter = [[self alloc] initWithModel:model];
 
 	return [adapter serializeToJSONDictionary:error];
+}
+
++ (NSArray *)JSONArrayFromModels:(NSArray *)models error:(NSError **)error {
+	NSParameterAssert(models != nil);
+	NSParameterAssert([models isKindOfClass:NSArray.class]);
+
+	NSMutableArray *JSONArray = [NSMutableArray arrayWithCapacity:models.count];
+	for (MTLModel<MTLJSONSerializing> *model in models) {
+		NSDictionary *JSONDictionary = [self JSONDictionaryFromModel:model error:error];
+		if (JSONDictionary == nil) return nil;
+
+		[JSONArray addObject:JSONDictionary];
+	}
+
+	return JSONArray;
 }
 
 #pragma mark Lifecycle
@@ -116,9 +156,25 @@ static NSString * const MTLJSONAdapterThrownExceptionErrorKey = @"MTLJSONAdapter
 
 	NSMutableDictionary *dictionaryValue = [[NSMutableDictionary alloc] initWithCapacity:JSONDictionary.count];
 
-	for (NSString *propertyKey in [self.modelClass propertyKeys]) {
-		id JSONKeyPaths = self.JSONKeyPathsByPropertyKey[propertyKey];
+	NSSet *propertyKeys = [self.modelClass propertyKeys];
 
+	for (NSString *JSONKeyPath in self.JSONKeyPathsByPropertyKey) {
+		if ([propertyKeys containsObject:JSONKeyPath]) continue;
+
+		if (error != NULL) {
+			NSDictionary *userInfo = @{
+				NSLocalizedDescriptionKey: NSLocalizedString(@"Invalid JSON mapping", nil),
+				NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:NSLocalizedString(@"%1$@ could not be parsed because its JSON mapping contains illegal property keys.", nil), modelClass]
+			};
+
+			*error = [NSError errorWithDomain:MTLJSONAdapterErrorDomain code:MTLJSONAdapterErrorInvalidJSONMapping userInfo:userInfo];
+		}
+
+		return nil;
+	}
+
+	for (NSString *propertyKey in propertyKeys) {
+		id JSONKeyPaths = self.JSONKeyPathsByPropertyKey[propertyKey];
 		if (JSONKeyPaths == nil) continue;
 
 		id value;

@@ -262,7 +262,8 @@ it easy to specify how new model data should be integrated.
 
 This is where reversible transformers really come in handy. `+[MTLJSONAdapter
 JSONDictionaryFromModel:]` can transform any model object conforming to
-`<MTLJSONSerializing>` back into a JSON dictionary.
+`<MTLJSONSerializing>` back into a JSON dictionary. `+[MTLJSONAdapter
+JSONArrayForModels:]` is the same but turns an array of model objects into an JSON array of dictionaries.
 
 > If the interface of `GHIssue` changes down the road, existing archives might break.
 
