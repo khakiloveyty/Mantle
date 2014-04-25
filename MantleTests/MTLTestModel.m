@@ -137,6 +137,9 @@ static NSUInteger modelVersion = 1;
 
 @end
 
+@implementation MTLSubclassTestModel
+@end
+
 @implementation MTLArrayTestModel
 
 + (NSDictionary *)JSONKeyPathsByPropertyKey {
@@ -439,6 +442,16 @@ static NSUInteger modelVersion = 1;
 
 - (NSString *)flavor {
 	return @"strawberry";
+}
+
+@end
+
+@implementation MTLIllegalJSONMappingModel
+
++ (NSDictionary *)JSONKeyPathsByPropertyKey {
+	return @{
+		@"name": @"username"
+	};
 }
 
 @end

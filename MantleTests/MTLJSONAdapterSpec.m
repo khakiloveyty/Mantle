@@ -28,7 +28,7 @@ it(@"should initialize with a model class", ^{
 	expect(model).notTo.beNil();
 	expect(model.name).to.beNil();
 	expect(model.count).to.equal(5);
-	
+
 	NSDictionary *JSONDictionary = @{
 		@"username": NSNull.null,
 		@"count": @"5",
@@ -93,7 +93,7 @@ it(@"should return nil and error with an invalid key path from JSON",^{
 		@"nested": @"bar",
 		@"count": @"0"
 	};
-	
+
 	NSError *error = nil;
 	MTLTestModel *model = [MTLJSONAdapter modelOfClass:MTLTestModel.class fromJSONDictionary:values error:&error];
 	expect(model).beNil();
@@ -102,7 +102,20 @@ it(@"should return nil and error with an invalid key path from JSON",^{
 	expect(error.code).to.equal(MTLJSONAdapterErrorInvalidJSONDictionary);
 });
 
-it(@"should not support key paths across arrays", ^{
+it(@"should return nil and error with an illegal JSON mapping", ^{
+	NSDictionary *values = @{
+		@"username": @"foo"
+	};
+
+	NSError *error = nil;
+	MTLIllegalJSONMappingModel *model = [MTLJSONAdapter modelOfClass:MTLIllegalJSONMappingModel.class fromJSONDictionary:values error:&error];
+	expect(model).beNil();
+	expect(error).notTo.beNil();
+	expect(error.domain).to.equal(MTLJSONAdapterErrorDomain);
+	expect(error.code).to.equal(MTLJSONAdapterErrorInvalidJSONMapping);
+});
+
+it(@"should support key paths across arrays", ^{
 	NSDictionary *values = @{
 		@"users": @[
 			@{
@@ -132,12 +145,12 @@ it(@"should initialize without returning any error when using a JSON dictionary 
 		@"nested": NSNull.null,
 		@"count": @"0"
 	};
-	
+
 	NSError *error = nil;
 	MTLTestModel *model = [MTLJSONAdapter modelOfClass:MTLTestModel.class fromJSONDictionary:values error:&error];
 	expect(model).notTo.beNil();
 	expect(error).to.beNil();
-	
+
 	expect(model.name).to.equal(@"foo");
 	expect(model.count).to.equal(0);
 	expect(model.nestedName).to.beNil();
@@ -356,5 +369,75 @@ it(@"should return an error when no suitable model class is found", ^{
 	expect(error.domain).to.equal(MTLJSONAdapterErrorDomain);
 	expect(error.code).to.equal(MTLJSONAdapterErrorNoClassFound);
 });
+
+describe(@"Deserializing multiple models", ^{
+	NSDictionary *value1 = @{
+		@"username": @"foo"
+	};
+
+	NSDictionary *value2 = @{
+		@"username": @"bar"
+	};
+
+	NSArray *JSONModels = @[ value1, value2 ];
+
+	it(@"should initialize models from an array of JSON dictionaries", ^{
+		NSError *error = nil;
+		NSArray *mantleModels = [MTLJSONAdapter modelsOfClass:MTLTestModel.class fromJSONArray:JSONModels error:&error];
+
+		expect(error).to.beNil();
+		expect(mantleModels).toNot.beNil();
+		expect(mantleModels).haveCountOf(2);
+		expect([mantleModels[0] name]).to.equal(@"foo");
+		expect([mantleModels[1] name]).to.equal(@"bar");
+	});
+
+	it(@"should not be affected by a NULL error parameter", ^{
+		NSError *error = nil;
+		NSArray *expected = [MTLJSONAdapter modelsOfClass:MTLTestModel.class fromJSONArray:JSONModels error:&error];
+		NSArray *models = [MTLJSONAdapter modelsOfClass:MTLTestModel.class fromJSONArray:JSONModels error:NULL];
+
+		expect(models).to.equal(expected);
+	});
+});
+
+it(@"should return nil and an error if it fails to initialize any model from an array", ^{
+	NSDictionary *value1 = @{
+		@"username": @"foo",
+		@"count": @"1",
+	};
+
+	NSDictionary *value2 = @{
+		@"count": @[ @"This won't parse" ],
+	};
+
+	NSArray *JSONModels = @[ value1, value2 ];
+
+	NSError *error = nil;
+	NSArray *mantleModels = [MTLJSONAdapter modelsOfClass:MTLSubstitutingTestModel.class fromJSONArray:JSONModels error:&error];
+
+	expect(error).toNot.beNil();
+	expect(error.domain).to.equal(MTLJSONAdapterErrorDomain);
+	expect(error.code).to.equal(MTLJSONAdapterErrorNoClassFound);
+	expect(mantleModels).to.beNil();
+});
+
+it(@"should return an array of dictionaries from models", ^{
+	MTLTestModel *model1 = [[MTLTestModel alloc] init];
+	model1.name = @"foo";
+
+	MTLTestModel *model2 = [[MTLTestModel alloc] init];
+	model2.name = @"bar";
+
+	NSError *error = nil;
+	NSArray *JSONArray = [MTLJSONAdapter JSONArrayFromModels:@[ model1, model2 ] error:&error];
+
+	expect(error).to.beNil();
+	expect(JSONArray).toNot.beNil();
+	expect(JSONArray).haveCountOf(2);
+	expect(JSONArray[0][@"username"]).to.equal(@"foo");
+	expect(JSONArray[1][@"username"]).to.equal(@"bar");
+});
+
 
 SpecEnd
