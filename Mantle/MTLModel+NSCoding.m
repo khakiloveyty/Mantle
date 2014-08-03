@@ -17,20 +17,6 @@ static NSString * const MTLModelVersionKey = @"MTLModelVersion";
 // Used to cache the reflection performed in +allowedSecureCodingClassesByPropertyKey.
 static void *MTLModelCachedAllowedClassesKey = &MTLModelCachedAllowedClassesKey;
 
-// Returns whether the given NSCoder requires secure coding.
-static BOOL coderRequiresSecureCoding(NSCoder *coder) {
-	SEL requiresSecureCodingSelector = @selector(requiresSecureCoding);
-
-	// Only invoke the method if it's implemented (i.e., only on OS X 10.8+ and
-	// iOS 6+).
-	if (![coder respondsToSelector:requiresSecureCodingSelector]) return NO;
-
-	BOOL (*requiresSecureCodingIMP)(NSCoder *, SEL) = (__typeof__(requiresSecureCodingIMP))[coder methodForSelector:requiresSecureCodingSelector];
-	if (requiresSecureCodingIMP == NULL) return NO;
-
-	return requiresSecureCodingIMP(coder, requiresSecureCodingSelector);
-}
-
 // Returns all of the given class' encodable property keys (those that will not
 // be excluded from archives).
 static NSSet *encodablePropertyKeysForClass(Class modelClass) {
@@ -141,7 +127,7 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 	}
 
 	@try {
-		if (coderRequiresSecureCoding(coder)) {
+		if (coder.requiresSecureCoding) {
 			NSArray *allowedClasses = self.class.allowedSecureCodingClassesByPropertyKey[key];
 			NSAssert(allowedClasses != nil, @"No allowed classes specified for securely decoding key \"%@\" on %@", key, self.class);
 			
@@ -158,7 +144,7 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 #pragma mark NSCoding
 
 - (instancetype)initWithCoder:(NSCoder *)coder {
-	BOOL requiresSecureCoding = coderRequiresSecureCoding(coder);
+	BOOL requiresSecureCoding = coder.requiresSecureCoding;
 	NSNumber *version = nil;
 	if (requiresSecureCoding) {
 		version = [coder decodeObjectOfClass:NSNumber.class forKey:MTLModelVersionKey];
@@ -175,21 +161,6 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 
 	if (requiresSecureCoding) {
 		verifyAllowedClassesByPropertyKey(self.class);
-	} else {
-		// Handle the old archive format.
-		NSDictionary *externalRepresentation = [coder decodeObjectForKey:@"externalRepresentation"];
-		if (externalRepresentation != nil) {
-			NSAssert([self.class methodForSelector:@selector(dictionaryValueFromArchivedExternalRepresentation:version:)] != [MTLModel methodForSelector:@selector(dictionaryValueFromArchivedExternalRepresentation:version:)], @"Decoded an old archive of %@ that contains an externalRepresentation, but +dictionaryValueFromArchivedExternalRepresentation:version: is not overridden to handle it", self.class);
-
-			NSDictionary *dictionaryValue = [self.class dictionaryValueFromArchivedExternalRepresentation:externalRepresentation version:version.unsignedIntegerValue];
-			if (dictionaryValue == nil) return nil;
-
-			NSError *error = nil;
-			self = [self initWithDictionary:dictionaryValue error:&error];
-			if (self == nil) NSLog(@"*** Could not decode old %@ archive: %@", self.class, error);
-
-			return self;
-		}
 	}
 
 	NSSet *propertyKeys = self.class.propertyKeys;
@@ -210,7 +181,7 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder {
-	if (coderRequiresSecureCoding(coder)) verifyAllowedClassesByPropertyKey(self.class);
+	if (coder.requiresSecureCoding) { verifyAllowedClassesByPropertyKey(self.class); }
 
 	[coder encodeObject:@(self.class.modelVersion) forKey:MTLModelVersionKey];
 
@@ -253,14 +224,6 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 	// to implement it but does not override -initWithCoder:. See
 	// https://github.com/github/Mantle/issues/74.
 	return NO;
-}
-
-@end
-
-@implementation MTLModel (OldArchiveSupport)
-
-+ (NSDictionary *)dictionaryValueFromArchivedExternalRepresentation:(__unused NSDictionary *)externalRepresentation version:(__unused NSUInteger)fromVersion {
-	return nil;
 }
 
 @end
