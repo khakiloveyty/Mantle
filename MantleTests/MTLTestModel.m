@@ -6,10 +6,7 @@
 //  Copyright (c) 2012 GitHub. All rights reserved.
 //
 
-#import "NSDictionary+MTLManipulationAdditions.h"
-
 #import "MTLTestModel.h"
-#import "NSDictionary+MTLMappingAdditions.h"
 
 NSString * const MTLTestModelErrorDomain = @"MTLTestModelErrorDomain";
 const NSInteger MTLTestModelNameTooLong = 1;
