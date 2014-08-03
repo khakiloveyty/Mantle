@@ -225,6 +225,13 @@
 			remoteGlobalIDString = D042FC7815F72BC7004E8054;
 			remoteInfo = "Mantle-iOS";
 		};
+		DB62C8D7198ED4E900F3F95F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D042FC3215F72B23004E8054 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D042FC3B15F72B23004E8054;
+			remoteInfo = Mantle;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -775,6 +782,7 @@
 				DB62C8D0198ED36E00F3F95F /* PBXTargetDependency */,
 				DB62C8D2198ED37100F3F95F /* PBXTargetDependency */,
 				DB62C8D4198ED38000F3F95F /* PBXTargetDependency */,
+				DB62C8D8198ED4E900F3F95F /* PBXTargetDependency */,
 			);
 			name = "Mantle Tests";
 			productName = "Mantle Tests";
@@ -1028,6 +1036,11 @@
 			target = D042FC7815F72BC7004E8054 /* Mantle-iOS */;
 			targetProxy = DB62C8D5198ED38100F3F95F /* PBXContainerItemProxy */;
 		};
+		DB62C8D8198ED4E900F3F95F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D042FC3B15F72B23004E8054 /* Mantle */;
+			targetProxy = DB62C8D7198ED4E900F3F95F /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -1038,8 +1051,8 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_PREFIX_HEADER = "Mantle/Mantle-Prefix.pch";
-				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
 			};
 			name = Debug;
 		};
@@ -1050,8 +1063,8 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_PREFIX_HEADER = "Mantle/Mantle-Prefix.pch";
-				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
 			};
 			name = Release;
 		};
@@ -1110,8 +1123,8 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_PREFIX_HEADER = "Mantle/Mantle-Prefix.pch";
-				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
 			};
 			name = Profile;
 		};
@@ -1173,8 +1186,8 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_PREFIX_HEADER = "Mantle/Mantle-Prefix.pch";
-				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
 			};
 			name = Test;
 		};
@@ -1418,6 +1431,7 @@
 				DB62C8B5198ED2AA00F3F95F /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
