@@ -11,7 +11,6 @@
 #import "NSDictionary+MTLJSONKeyPath.h"
 
 #import "EXTRuntimeExtensions.h"
-#import "EXTScope.h"
 #import "MTLJSONAdapter.h"
 #import "MTLModel.h"
 #import "MTLTransformerErrorHandling.h"
@@ -395,9 +394,6 @@ static NSString * const MTLJSONAdapterThrownExceptionErrorKey = @"MTLJSONAdapter
 		if (property == NULL) continue;
 
 		mtl_propertyAttributes *attributes = mtl_copyPropertyAttributes(property);
-		@onExit {
-			free(attributes);
-		};
 
 		NSValueTransformer *transformer = nil;
 
@@ -414,6 +410,8 @@ static NSString * const MTLJSONAdapterThrownExceptionErrorKey = @"MTLJSONAdapter
 		}
 
 		if (transformer != nil) result[key] = transformer;
+		
+		free(attributes);
 	}
 
 	return result;

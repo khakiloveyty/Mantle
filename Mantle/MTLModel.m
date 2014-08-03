@@ -9,7 +9,6 @@
 #import "NSError+MTLModelException.h"
 #import "MTLModel.h"
 #import "EXTRuntimeExtensions.h"
-#import "EXTScope.h"
 #import "MTLReflection.h"
 #import <objc/runtime.h>
 
@@ -161,14 +160,12 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 		cls = cls.superclass;
 		if (properties == NULL) continue;
 
-		@onExit {
-			free(properties);
-		};
-
 		for (unsigned i = 0; i < count; i++) {
 			block(properties[i], &stop);
 			if (stop) break;
 		}
+		
+		free(properties);
 	}
 }
 
@@ -223,19 +220,21 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 
 + (MTLPropertyStorage)storageBehaviorForPropertyWithKey:(NSString *)propertyKey {
 	objc_property_t property = class_getProperty(self.class, propertyKey.UTF8String);
-
 	if (property == NULL) return MTLPropertyStorageNone;
 
 	mtl_propertyAttributes *attributes = mtl_copyPropertyAttributes(property);
-	@onExit {
-		free(attributes);
-	};
+	if (attributes == NULL) return MTLPropertyStorageNone;
 
+	MTLPropertyStorage ret;
 	if (attributes->readonly && attributes->ivar == NULL) {
-		return MTLPropertyStorageNone;
+		ret = MTLPropertyStorageNone;
 	} else {
-		return MTLPropertyStoragePermanent;
+		ret = MTLPropertyStoragePermanent;
 	}
+	
+	free(attributes);
+	
+	return ret;
 }
 
 #pragma mark Merging
