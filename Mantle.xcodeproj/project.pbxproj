@@ -124,6 +124,20 @@
 		DB62C8CC198ED2E800F3F95F /* MTLTestModel.m in Sources */ = {isa = PBXBuildFile; fileRef = D0760EC815FFCA4E0060F550 /* MTLTestModel.m */; };
 		DB62C8CD198ED2E800F3F95F /* MTLTestJSONAdapter.m in Sources */ = {isa = PBXBuildFile; fileRef = 54314BCF18ED78A6006F7517 /* MTLTestJSONAdapter.m */; };
 		DB62C8CE198ED2EE00F3F95F /* MTLTestModel-OldArchive.plist in Resources */ = {isa = PBXBuildFile; fileRef = D01BD0B916CB6F5700EC95C7 /* MTLTestModel-OldArchive.plist */; };
+		DB62C8DB198ED5C400F3F95F /* NSError+MTLModelException.h in Headers */ = {isa = PBXBuildFile; fileRef = 54803A30178829A700011B39 /* NSError+MTLModelException.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		DB62C8DC198ED5C400F3F95F /* NSError+MTLModelException.h in Headers */ = {isa = PBXBuildFile; fileRef = 54803A30178829A700011B39 /* NSError+MTLModelException.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		DB62C8DD198ED5C500F3F95F /* NSError+MTLModelException.h in Headers */ = {isa = PBXBuildFile; fileRef = 54803A30178829A700011B39 /* NSError+MTLModelException.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		DB62C8DE198ED5CC00F3F95F /* NSDictionary+MTLMappingAdditions.h in Headers */ = {isa = PBXBuildFile; fileRef = 547F78531822BCFD00BBAB7B /* NSDictionary+MTLMappingAdditions.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		DB62C8DF198ED5D000F3F95F /* NSDictionary+MTLJSONKeyPath.h in Headers */ = {isa = PBXBuildFile; fileRef = 54EDCD0818D9B34F005796FC /* NSDictionary+MTLJSONKeyPath.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		DB62C8E0198ED5D000F3F95F /* NSDictionary+MTLJSONKeyPath.h in Headers */ = {isa = PBXBuildFile; fileRef = 54EDCD0818D9B34F005796FC /* NSDictionary+MTLJSONKeyPath.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		DB62C8E1198ED5D400F3F95F /* NSDictionary+MTLJSONKeyPath.h in Headers */ = {isa = PBXBuildFile; fileRef = 54EDCD0818D9B34F005796FC /* NSDictionary+MTLJSONKeyPath.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		DB62C8E2198ED5DE00F3F95F /* MTLReflection.h in Headers */ = {isa = PBXBuildFile; fileRef = D058FE1D16EFB3D2009DFB47 /* MTLReflection.h */; };
+		DB62C8E3198ED5DF00F3F95F /* MTLReflection.h in Headers */ = {isa = PBXBuildFile; fileRef = D058FE1D16EFB3D2009DFB47 /* MTLReflection.h */; };
+		DB62C8E4198ED5E000F3F95F /* MTLReflection.h in Headers */ = {isa = PBXBuildFile; fileRef = D058FE1D16EFB3D2009DFB47 /* MTLReflection.h */; };
+		DB62C8E5198ED61B00F3F95F /* MTLTransformerErrorHandling.m in Sources */ = {isa = PBXBuildFile; fileRef = 5487912318210717007F8347 /* MTLTransformerErrorHandling.m */; };
+		DB62C8E6198ED62100F3F95F /* NSError+MTLModelException.m in Sources */ = {isa = PBXBuildFile; fileRef = 54803A31178829A700011B39 /* NSError+MTLModelException.m */; };
+		DB62C8E7198ED62600F3F95F /* NSDictionary+MTLMappingAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 547F78541822BCFD00BBAB7B /* NSDictionary+MTLMappingAdditions.m */; };
+		DB62C8E8198ED62A00F3F95F /* NSDictionary+MTLJSONKeyPath.m in Sources */ = {isa = PBXBuildFile; fileRef = 54EDCD0918D9B34F005796FC /* NSDictionary+MTLJSONKeyPath.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -226,6 +240,13 @@
 			remoteInfo = "Mantle-iOS";
 		};
 		DB62C8D7198ED4E900F3F95F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D042FC3215F72B23004E8054 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D042FC3B15F72B23004E8054;
+			remoteInfo = Mantle;
+		};
+		DB62C8D9198ED4E900F3F95F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D042FC3215F72B23004E8054 /* Project object */;
 			proxyType = 1;
@@ -633,14 +654,17 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DB62C8E1198ED5D400F3F95F /* NSDictionary+MTLJSONKeyPath.h in Headers */,
 				547F78551822BCFD00BBAB7B /* NSDictionary+MTLMappingAdditions.h in Headers */,
 				D0760E0515FFBD440060F550 /* Mantle.h in Headers */,
+				DB62C8E4198ED5E000F3F95F /* MTLReflection.h in Headers */,
 				D0760E7815FFBF330060F550 /* MTLModel.h in Headers */,
 				D08B5AAE16002694001FE685 /* MTLValueTransformer.h in Headers */,
 				88080C18160A706900CCABF2 /* NSArray+MTLManipulationAdditions.h in Headers */,
 				D0C27D0A16110973002FE587 /* NSDictionary+MTLManipulationAdditions.h in Headers */,
 				D0F117491614C5600092520B /* NSValueTransformer+MTLPredefinedTransformerAdditions.h in Headers */,
 				1ED5B5D0163A4E3C0072668E /* NSObject+MTLComparisonAdditions.h in Headers */,
+				DB62C8DD198ED5C500F3F95F /* NSError+MTLModelException.h in Headers */,
 				547165A41801977000E734DB /* MTLTransformerErrorHandling.h in Headers */,
 				D01BD09D16CB432D00EC95C7 /* MTLJSONAdapter.h in Headers */,
 				D01BD0AF16CB52E800EC95C7 /* MTLModel+NSCoding.h in Headers */,
@@ -652,12 +676,16 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DB62C8E0198ED5D000F3F95F /* NSDictionary+MTLJSONKeyPath.h in Headers */,
 				D0A56B7F1804B16B00A84EDC /* NSArray+MTLManipulationAdditions.h in Headers */,
 				D0A56B771804B14F00A84EDC /* MTLModel+NSCoding.h in Headers */,
+				DB62C8E3198ED5DF00F3F95F /* MTLReflection.h in Headers */,
 				D0A56B871804B16B00A84EDC /* NSValueTransformer+MTLPredefinedTransformerAdditions.h in Headers */,
 				D0A56B7D1804B15900A84EDC /* MTLValueTransformer.h in Headers */,
+				DB62C8DB198ED5C400F3F95F /* NSError+MTLModelException.h in Headers */,
 				D0A56B811804B16B00A84EDC /* NSDictionary+MTLManipulationAdditions.h in Headers */,
 				D0A56B831804B16B00A84EDC /* NSObject+MTLComparisonAdditions.h in Headers */,
+				DB62C8DE198ED5CC00F3F95F /* NSDictionary+MTLMappingAdditions.h in Headers */,
 				D0A56B761804B14F00A84EDC /* MTLModel.h in Headers */,
 				D0A56B791804B15600A84EDC /* MTLJSONAdapter.h in Headers */,
 				5470B5E61985249D00E4D941 /* MTLTransformerErrorHandling.h in Headers */,
@@ -670,14 +698,17 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DB62C8DF198ED5D000F3F95F /* NSDictionary+MTLJSONKeyPath.h in Headers */,
 				D8A172F81697E87A002CFCC8 /* Mantle.h in Headers */,
 				D8A172F91697E87A002CFCC8 /* MTLModel.h in Headers */,
+				DB62C8E2198ED5DE00F3F95F /* MTLReflection.h in Headers */,
 				D8A172FA1697E87A002CFCC8 /* MTLValueTransformer.h in Headers */,
 				D8A172FC1697E87A002CFCC8 /* NSArray+MTLManipulationAdditions.h in Headers */,
 				D8A172FE1697E87A002CFCC8 /* NSDictionary+MTLManipulationAdditions.h in Headers */,
 				547F78561822BCFD00BBAB7B /* NSDictionary+MTLMappingAdditions.h in Headers */,
 				D8A173021697E87A002CFCC8 /* NSValueTransformer+MTLPredefinedTransformerAdditions.h in Headers */,
 				547165A51801977000E734DB /* MTLTransformerErrorHandling.h in Headers */,
+				DB62C8DC198ED5C400F3F95F /* NSError+MTLModelException.h in Headers */,
 				D8A173031697E87A002CFCC8 /* NSObject+MTLComparisonAdditions.h in Headers */,
 				D01BD09E16CB432D00EC95C7 /* MTLJSONAdapter.h in Headers */,
 				D01BD0B016CB52E800EC95C7 /* MTLModel+NSCoding.h in Headers */,
@@ -783,6 +814,7 @@
 				DB62C8D2198ED37100F3F95F /* PBXTargetDependency */,
 				DB62C8D4198ED38000F3F95F /* PBXTargetDependency */,
 				DB62C8D8198ED4E900F3F95F /* PBXTargetDependency */,
+				DB62C8DA198ED4E900F3F95F /* PBXTargetDependency */,
 			);
 			name = "Mantle Tests";
 			productName = "Mantle Tests";
@@ -913,7 +945,11 @@
 				D0A56B881804B16B00A84EDC /* NSValueTransformer+MTLPredefinedTransformerAdditions.m in Sources */,
 				D0A56B841804B16B00A84EDC /* NSObject+MTLComparisonAdditions.m in Sources */,
 				D0A56B861804B16B00A84EDC /* NSValueTransformer+MTLInversionAdditions.m in Sources */,
+				DB62C8E8198ED62A00F3F95F /* NSDictionary+MTLJSONKeyPath.m in Sources */,
+				DB62C8E6198ED62100F3F95F /* NSError+MTLModelException.m in Sources */,
+				DB62C8E5198ED61B00F3F95F /* MTLTransformerErrorHandling.m in Sources */,
 				D0A56B821804B16B00A84EDC /* NSDictionary+MTLManipulationAdditions.m in Sources */,
+				DB62C8E7198ED62600F3F95F /* NSDictionary+MTLMappingAdditions.m in Sources */,
 				D0A56B781804B14F00A84EDC /* MTLModel+NSCoding.m in Sources */,
 				D0A56B7A1804B15600A84EDC /* MTLJSONAdapter.m in Sources */,
 				D0A56B8B1804B1A000A84EDC /* EXTRuntimeExtensions.m in Sources */,
@@ -1040,6 +1076,11 @@
 			isa = PBXTargetDependency;
 			target = D042FC3B15F72B23004E8054 /* Mantle */;
 			targetProxy = DB62C8D7198ED4E900F3F95F /* PBXContainerItemProxy */;
+		};
+		DB62C8DA198ED4E900F3F95F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D042FC3B15F72B23004E8054 /* Mantle */;
+			targetProxy = DB62C8D9198ED4E900F3F95F /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
