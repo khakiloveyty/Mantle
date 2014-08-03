@@ -10,7 +10,7 @@
 
 @implementation MTLTestJSONAdapter
 
-- (NSSet *)serializablePropertyKeys:(NSSet *)propertyKeys forModel:(id<MTLJSONSerializing>)model {
+- (NSSet *)serializablePropertyKeys:(NSSet *)propertyKeys forModel:(__unused id<MTLJSONSerializing>)model {
 	NSMutableSet *copy = [propertyKeys mutableCopy];
 
 	[copy minusSet:self.ignoredPropertyKeys];

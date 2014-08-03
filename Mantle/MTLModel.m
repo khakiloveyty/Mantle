@@ -178,7 +178,7 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 
 	NSMutableSet *keys = [NSMutableSet set];
 
-	[self enumeratePropertiesUsingBlock:^(objc_property_t property, BOOL *stop) {
+	[self enumeratePropertiesUsingBlock:^(objc_property_t property, BOOL *__unused stop) {
 		NSString *key = @(property_getName(property));
 
 		if ([self storageBehaviorForPropertyWithKey:key] != MTLPropertyStorageNone) {

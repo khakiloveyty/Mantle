@@ -61,7 +61,7 @@
 }
 
 - (id)transformedValue:(id)value {
-	NSError *error = nil;
+	NSError *__unused error = nil;
 	BOOL success = YES;
 
 	return self.forwardBlock(value, &success, &error);
@@ -97,7 +97,7 @@
 }
 
 - (id)reverseTransformedValue:(id)value {
-	NSError *error = nil;
+	NSError *__unused error = nil;
 	BOOL success = YES;
 
 	return self.reverseBlock(value, &success, &error);
@@ -124,23 +124,23 @@
 #pragma clang diagnostic ignored "-Wdeprecated-implementations"
 
 + (instancetype)transformerWithBlock:(id (^)(id))transformationBlock {
-	return [self transformerUsingForwardBlock:^(id value, BOOL *success, NSError **error) {
+	return [self transformerUsingForwardBlock:^(id value, BOOL *__unused success, __unused NSError **error) {
 		return transformationBlock(value);
 	}];
 }
 
 + (instancetype)reversibleTransformerWithBlock:(id (^)(id))transformationBlock {
-	return [self transformerUsingReversibleBlock:^(id value, BOOL *success, NSError **error) {
+	return [self transformerUsingReversibleBlock:^(id value, BOOL *__unused success, __unused NSError **error) {
 		return transformationBlock(value);
 	}];
 }
 
 + (instancetype)reversibleTransformerWithForwardBlock:(id (^)(id))forwardBlock reverseBlock:(id (^)(id))reverseBlock {
 	return [self
-		transformerUsingForwardBlock:^(id value, BOOL *success, NSError **error) {
+		transformerUsingForwardBlock:^(id value, BOOL *__unused success, __unused NSError **error) {
 			return forwardBlock(value);
 		}
-		reverseBlock:^(id value, BOOL *success, NSError **error) {
+		reverseBlock:^(id value, BOOL *__unused success, __unused NSError **error) {
 			return reverseBlock(value);
 		}];
 }

@@ -19,11 +19,11 @@
 	return NSString.class;
 }
 
-- (id)transformedValue:(id)value {
+- (id)transformedValue:(__unused id)value {
 	return @"forward";
 }
 
-- (id)reverseTransformedValue:(id)value {
+- (id)reverseTransformedValue:(__unused id)value {
 	return @"reverse";
 }
 

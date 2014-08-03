@@ -26,9 +26,9 @@
 			return [errorHandlingSelf transformedValue:value success:success error:error];
 		}];
 	} else {
-		return [MTLValueTransformer transformerUsingForwardBlock:^(id value, BOOL *success, NSError **error) {
+		return [MTLValueTransformer transformerUsingForwardBlock:^(id value, BOOL *__unused success, __unused NSError **error) {
 			return [self reverseTransformedValue:value];
-		} reverseBlock:^(id value, BOOL *success, NSError **error) {
+		} reverseBlock:^(id value, BOOL *__unused success, __unused NSError **error) {
 			return [self transformedValue:value];
 		}];
 	}

@@ -273,7 +273,7 @@
 
 - (void)testWithForwardTransformer
 {
-	NSValueTransformer *appliedTransformer = [MTLValueTransformer transformerUsingForwardBlock:^(NSString *str, BOOL *success, NSError **error) {
+	NSValueTransformer *appliedTransformer = [MTLValueTransformer transformerUsingForwardBlock:^(NSString *str, BOOL *__unused success, __unused NSError **error) {
 		return [NSURL URLWithString:str];
 	}];
 	transformer = [NSValueTransformer mtl_arrayMappingTransformerWithTransformer:appliedTransformer];

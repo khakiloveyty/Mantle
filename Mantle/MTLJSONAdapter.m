@@ -419,7 +419,7 @@ static NSString * const MTLJSONAdapterThrownExceptionErrorKey = @"MTLJSONAdapter
 	return result;
 }
 
-- (MTLJSONAdapter *)JSONAdapterForModelClass:(Class)modelClass error:(NSError **)error {
+- (MTLJSONAdapter *)JSONAdapterForModelClass:(Class)modelClass error:(__unused NSError **)error {
 	NSParameterAssert(modelClass != nil);
 	NSParameterAssert([modelClass conformsToProtocol:@protocol(MTLJSONSerializing)]);
 
@@ -438,7 +438,7 @@ static NSString * const MTLJSONAdapterThrownExceptionErrorKey = @"MTLJSONAdapter
 	}
 }
 
-- (NSSet *)serializablePropertyKeys:(NSSet *)propertyKeys forModel:(id<MTLJSONSerializing>)model {
+- (NSSet *)serializablePropertyKeys:(NSSet *)propertyKeys forModel:(__unused id<MTLJSONSerializing>)model {
 	return propertyKeys;
 }
 

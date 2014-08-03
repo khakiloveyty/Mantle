@@ -15,7 +15,7 @@
 
 - (void)testForwardTransformer
 {
-	MTLValueTransformer *transformer = [MTLValueTransformer transformerUsingForwardBlock:^(NSString *str, BOOL *success, NSError **error) {
+	MTLValueTransformer *transformer = [MTLValueTransformer transformerUsingForwardBlock:^(NSString *str, BOOL *__unused success, __unused NSError **error) {
 		return [str stringByAppendingString:@"bar"];
 	}];
 
@@ -28,7 +28,7 @@
 
 - (void)testReversibleTransformer
 {
-	MTLValueTransformer *transformer = [MTLValueTransformer transformerUsingReversibleBlock:^(NSString *str, BOOL *success, NSError **error) {
+	MTLValueTransformer *transformer = [MTLValueTransformer transformerUsingReversibleBlock:^(NSString *str, BOOL *__unused success, __unused NSError **error) {
 		return [str stringByAppendingString:@"bar"];
 	}];
 
@@ -42,10 +42,10 @@
 - (void)testReversibleTwoWayTransformer
 {
 	MTLValueTransformer *transformer = [MTLValueTransformer
-		transformerUsingForwardBlock:^(NSString *str, BOOL *success, NSError **error) {
+		transformerUsingForwardBlock:^(NSString *str, BOOL *__unused success, __unused NSError **error) {
 			return [str stringByAppendingString:@"bar"];
 		}
-		reverseBlock:^(NSString *str, BOOL *success, NSError **error) {
+		reverseBlock:^(NSString *str, BOOL *__unused success, __unused NSError **error) {
 			return [str substringToIndex:str.length - 3];
 		}];
 

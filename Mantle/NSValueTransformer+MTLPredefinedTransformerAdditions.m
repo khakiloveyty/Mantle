@@ -306,10 +306,10 @@ NSString * const MTLBooleanValueTransformerName = @"MTLBooleanValueTransformerNa
 	NSParameterAssert(dictionary.count == [[NSSet setWithArray:dictionary.allValues] count]);
 
 	return [MTLValueTransformer
-			transformerUsingForwardBlock:^ id (id <NSCopying> key, BOOL *success, NSError **error) {
+			transformerUsingForwardBlock:^(id <NSCopying> key, BOOL *__unused success, __unused NSError **error) {
 				return dictionary[key ?: NSNull.null] ?: defaultValue;
 			}
-			reverseBlock:^ id (id value, BOOL *success, NSError **error) {
+			reverseBlock:^ id (id value, BOOL *__unused success, __unused NSError **error) {
 				__block id result = nil;
 				[dictionary enumerateKeysAndObjectsUsingBlock:^(id key, id anObject, BOOL *stop) {
 					if ([value isEqual:anObject]) {
