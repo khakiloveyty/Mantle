@@ -82,16 +82,16 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 + (void)generateAndCachePropertyKeys {
 	NSMutableSet *transitoryKeys = [NSMutableSet set];
 	NSMutableSet *permanentKeys = [NSMutableSet set];
-	
-	[MTLPropertyAttributes enumeratePropertyNamesFromClass:self untilClass:MTLModel.class usingBlock:^(NSString *propertyKey) {
+
+	[MTLPropertyAttributes enumeratePropertiesFromClass:self untilClass:MTLModel.class usingBlock:^(NSString *propertyKey, BOOL *__unused stop) {
 		switch ([self storageBehaviorForPropertyWithKey:propertyKey]) {
 			case MTLPropertyStorageNone:
 				break;
-				
+
 			case MTLPropertyStorageTransitory:
 				[transitoryKeys addObject:propertyKey];
 				break;
-				
+
 			case MTLPropertyStoragePermanent:
 				[permanentKeys addObject:propertyKey];
 				break;

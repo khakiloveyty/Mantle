@@ -43,75 +43,71 @@ static inline NSString *MTLPropertyCopyStaticString(const char *text, size_t len
 
 @property (nonatomic, readonly) objc_property_t property;
 - (BOOL)setProperty:(objc_property_t)property;
-- (BOOL)setPropertyWithName:(NSString *)propertyName fromClass:(Class)cls;
-- (BOOL)setPropertyWithName:(NSString *)propertyName fromProtocol:(Protocol *)protocol;
 
 @property (nonatomic, readonly) NSString *typeString;
 @property (nonatomic, readonly) NSString *ivarString;
 
 @end
 
+static NSString *const MTLPropertyAttributesReuseKey = @"MTLPropertyAttributesReuse";
+
 @implementation MTLPropertyAttributes
 
-+ (void)mtl_enumeratePropertiesOfClass:(Class)cls untilClass:(Class)endCls usingBlock:(void (^)(objc_property_t property))block
++ (void)reuse:(dispatch_block_t)block
 {
-	if (endCls == NULL) endCls = [cls superclass];
-	if (cls == NULL || cls == endCls || cls == NSObject.class) return;
+	if (block == NULL) { return; }
 
-	unsigned int count = 0;
-	objc_property_t *properties = class_copyPropertyList(cls, &count);
+	NSMutableDictionary *threadDict = NSThread.currentThread.threadDictionary;
 
-	if (properties) {
-		for (unsigned int i = 0; i < count; i++) {
-			block(properties[i]);
-		}
-
-		free(properties);
+	BOOL independent = NO;
+	if (!threadDict[MTLPropertyAttributesReuseKey]) {
+		threadDict[MTLPropertyAttributesReuseKey] = [[MTLPropertyAttributes alloc] initPrivate];
+		independent = YES;
 	}
 
-	[self mtl_enumeratePropertiesOfClass:[cls superclass] untilClass:endCls usingBlock:block];
+	block();
+
+	if (independent) {
+		[threadDict removeObjectForKey:MTLPropertyAttributesReuseKey];
+	}
 }
 
-+ (void)enumeratePropertyNamesFromClass:(Class)cls untilClass:(Class)endCls usingBlock:(void (^)(NSString *propertyName))block
++ (instancetype)reusableAttributes
 {
-	NSParameterAssert(block != NULL);
-	
-	[self mtl_enumeratePropertiesOfClass:cls untilClass:endCls usingBlock:^(objc_property_t property) {
-		const char *propertyName = property_getName(property);
-		NSString *name = [[NSString alloc] initWithBytesNoCopy:(void *)propertyName length:strlen(propertyName) encoding:NSUTF8StringEncoding freeWhenDone:NO];
-		block(name);
-	}];
+	return NSThread.currentThread.threadDictionary[MTLPropertyAttributesReuseKey] ?: [[MTLPropertyAttributes alloc] initPrivate];
 }
 
-+ (void)enumeratePropertiesFromClass:(Class)cls untilClass:(Class)endCls usingBlock:(void (^)(MTLPropertyAttributes *attributes))block
++ (void)enumeratePropertiesFromClass:(Class)cls untilClass:(Class)endCls usingBlock:(void (^)(NSString *, BOOL *))block
 {
 	NSParameterAssert(block != NULL);
-	
-	__block MTLPropertyAttributes *attributes = [[MTLPropertyAttributes alloc] initPrivate];
-	[self mtl_enumeratePropertiesOfClass:cls untilClass:endCls usingBlock:^(objc_property_t property) {
-		if (![attributes setProperty:property]) {
-			return;
+
+	if (cls == NULL || cls == endCls || cls == NSObject.class) return;
+	if (endCls == NULL) endCls = cls.superclass;
+
+	[self reuse:^{
+		unsigned int count = 0;
+		objc_property_t *properties = class_copyPropertyList(cls, &count);
+
+		if (properties) {
+			BOOL stop = NO;
+
+			for (unsigned int i = 0; i < count; i++) {
+				const char *propertyName = property_getName(properties[i]);
+				block(MTLPropertyCopyStaticString(propertyName, 0), &stop);
+				if (stop) break;
+			}
+
+			free(properties);
 		}
 
-		block(attributes);
+		[self enumeratePropertiesFromClass:cls.superclass untilClass:endCls usingBlock:block];
 	}];
-}
-
-+ (NSSet *)namesOfPropertiesFromClass:(Class)cls untilClass:(Class)endCls passingTest:(BOOL (^)(NSString *propertyName))block
-{
-	
-	NSMutableSet *set = [NSMutableSet set];
-	[self enumeratePropertyNamesFromClass:cls untilClass:endCls usingBlock:^(NSString *propertyName) {
-		if (!block(propertyName)) { return; }
-		[set addObject:propertyName];
-	}];
-	return [set copy];
 }
 
 + (instancetype)propertyNamed:(NSString *)propertyName class:(Class)cls
 {
-	MTLPropertyAttributes *attributes = [[MTLPropertyAttributes alloc] initPrivate];
-	if (![attributes setPropertyWithName:propertyName fromClass:cls]) {
+	MTLPropertyAttributes *attributes = self.reusableAttributes;
+	if (![attributes setProperty:MTLPropertyFromClass(propertyName, cls)]) {
 		return nil;
 	}
 	return attributes;
@@ -119,8 +115,8 @@ static inline NSString *MTLPropertyCopyStaticString(const char *text, size_t len
 
 + (instancetype)propertyNamed:(NSString *)propertyName protocol:(Protocol *)proto
 {
-	MTLPropertyAttributes *attributes = [[MTLPropertyAttributes alloc] initPrivate];
-	if (![attributes setPropertyWithName:propertyName fromProtocol:proto]) {
+	MTLPropertyAttributes *attributes = self.reusableAttributes;
+	if (![attributes setProperty:MTLPropertyFromProtocol(propertyName, proto)]) {
 		return nil;
 	}
 	return attributes;
@@ -184,10 +180,7 @@ static inline NSString *MTLPropertyCopyStaticString(const char *text, size_t len
 
 - (BOOL)isEqual:(MTLPropertyAttributes *)object
 {
-	if (![object isKindOfClass:self.class]) {
-		return NO;
-	}
-	
+	if (![object isKindOfClass:self.class]) { return NO; }
 	return _property == object.property;
 }
 
@@ -197,14 +190,6 @@ static inline NSString *MTLPropertyCopyStaticString(const char *text, size_t len
 }
 
 #pragma mark -
-
-- (BOOL)setPropertyWithName:(NSString *)propertyName fromClass:(Class)cls {
-	return [self setProperty:MTLPropertyFromClass(propertyName, cls)];
-}
-
-- (BOOL)setPropertyWithName:(NSString *)propertyName fromProtocol:(Protocol *)protocol {
-	return [self setProperty:MTLPropertyFromProtocol(propertyName, protocol)];
-}
 
 - (BOOL)setProperty:(objc_property_t)property
 {

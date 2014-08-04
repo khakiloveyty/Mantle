@@ -39,44 +39,33 @@ typedef NS_ENUM(int8_t, MTLPropertyMemoryPolicy) {
 @interface MTLPropertyAttributes : NSObject
 
 /**
- Enumerates property names for the given class hierarchy, starting at the given
- class, and continuing up until (but not including) a given class.
- 
- The given block will be invoked multiple times for any properties declared on
- each class in the hierarchy.
+ * Enumerates the names of properties for the given class hierarchy, starting at
+ * the given class, and continuing up until (but not including) the given class.
+ *
+ * The given block will be invoked multiple times for any properties declared on
+ * each class in the hierarchy.
  */
-+ (void)enumeratePropertyNamesFromClass:(Class)cls untilClass:(Class)endCls usingBlock:(void (^)(NSString *propertyName))block;
++ (void)enumeratePropertiesFromClass:(Class)cls untilClass:(Class)endCls usingBlock:(void (^)(NSString *propertyName, BOOL *stop))block;
 
 /**
- Enumerates properties for the given class hierarchy, starting at the given
- class, and continuing up until (but not including) a given class.
-
- The given block will be invoked multiple times for any properties declared on
- each class in the hierarchy.
+ * Reuse the same property attributes for every call to +propertyNamed:class:
+ * or +propertyNamed:protocol in this block.
  */
-+ (void)enumeratePropertiesFromClass:(Class)cls untilClass:(Class)endCls usingBlock:(void (^)(MTLPropertyAttributes *attributes))block;
++ (void)reuse:(void(^)(void))reuseBlock;
 
 /**
- Checks all properties of the given class' hierarchy, starting at the given
- class, and continuing up until (but not including) a given class, for validity
- against a given block.
-
- The given block will be invoked multiple times for any properties declared on
- multiple classes in the hierarchy.
- */
-+ (NSSet *)namesOfPropertiesFromClass:(Class)cls untilClass:(Class)endCls passingTest:(BOOL (^)(NSString *propertyName))block;
-
-/**
- Returns property attributes for a given property on a given class.
+ * Returns property attributes for a given property on a given class.
  */
 + (instancetype)propertyNamed:(NSString *)propertyName class:(Class)cls;
 
 /**
- Returns property attributes for a given property on a given protocol.
+ * Returns property attributes for a given property on a given protocol.
  */
 + (instancetype)propertyNamed:(NSString *)propertyName protocol:(Protocol *)proto;
 
-/// Cannot be manually instantiated.
+/**
+ * This class cannot be manually instantiated.
+ */
 - (instancetype)init NS_UNAVAILABLE;
 
 /**

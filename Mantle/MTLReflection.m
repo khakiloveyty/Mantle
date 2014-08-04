@@ -8,6 +8,7 @@
 
 #import "MTLReflection.h"
 #import <objc/runtime.h>
+#import "MTLPropertyAttributes.h"
 
 SEL MTLSelectorWithKeyPattern(const char *prefix, NSString *key, const char *suffix) {
 	NSUInteger prefixLength = prefix ? strlen(prefix) : 0;
@@ -66,24 +67,33 @@ NSDictionary *MTLCopyPropertyKeyMapUsingBlock(Class <MTLModel> cls, id(^block)(N
 	NSMutableDictionary *result = nil;
 	
 	id sharedKeySet = MTLGetPropertyKeysSharedKeySet(cls);
+	BOOL copy = NO;
 	if (sharedKeySet) {
 		result = [NSMutableDictionary dictionaryWithSharedKeySet:sharedKeySet];
 	} else {
 		result = [NSMutableDictionary dictionary];
+		copy = YES;
 	}
-	
-	for (NSString *key in MTLGetPropertyKeysEnumerable(cls)) {
+
+	id <NSFastEnumeration> enumerable = MTLGetPropertyKeysEnumerable(cls);
+	__block BOOL stopped = NO;
+
+	[MTLPropertyAttributes reuse:^{
 		BOOL stop = NO;
-		id value = block(key, &stop);
-		
-		if (stop) {
-			return nil;
+
+		for (NSString *key in enumerable) {
+			id value = block(key, &stop);
+
+			if (stop) {
+				stopped = YES;
+				return;
+			}
+
+			if (value) { result[key] = value; }
 		}
-		
-		if (value) {
-			result[key] = value;
-		}
-	}
-	
-	return [result copy];
+	}];
+
+	if (stopped) { return nil; }
+
+	return copy ? result.copy : result;
 }
