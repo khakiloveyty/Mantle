@@ -289,28 +289,20 @@ static NSString * const MTLJSONAdapterThrownExceptionErrorKey = @"MTLJSONAdapter
 			NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
 
 			for (NSString *keyPath in JSONKeyPaths) {
-				BOOL success;
-				id value = [JSONDictionary mtl_valueForJSONKeyPath:keyPath success:&success error:error];
-				
-				if (!success) {
+				id value;
+				if (![JSONDictionary mtl_getValue:&value forJSONKeyPath:keyPath error:error]) {
 					*stop = YES;
 					return nil;
 				}
-				
-				if (value != nil) dictionary[keyPath] = value;
+				if (value != nil) { dictionary[keyPath] = value; }
 			}
 
 			value = dictionary;
-		} else {
-			BOOL success;
-			value = [JSONDictionary mtl_valueForJSONKeyPath:JSONKeyPaths success:&success error:error];
-			
-			if (!success) {
-				*stop = YES;
-				return nil;
-			}
+		} else if (![JSONDictionary mtl_getValue:&value forJSONKeyPath:JSONKeyPaths error:error]) {
+			*stop = YES;
+			return nil;
 		}
-		
+
 		if (value == nil) { return nil; }
 
 		@try {
