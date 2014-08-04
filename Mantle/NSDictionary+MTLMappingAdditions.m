@@ -6,18 +6,17 @@
 //  Copyright (c) 2013 GitHub. All rights reserved.
 //
 
-#import "MTLModel.h"
-
 #import "NSDictionary+MTLMappingAdditions.h"
+#import "MTLReflection.h"
+
+static void *MTLCachedPropertyKeysSharedKeySetKey = &MTLCachedPropertyKeysSharedKeySetKey;
 
 @implementation NSDictionary (MTLMappingAdditions)
 
-+ (NSDictionary *)mtl_identityPropertyMapWithModel:(Class)class {
-	NSCParameterAssert([class isSubclassOfClass:MTLModel.class]);
-
-	NSArray *propertyKeys = [class propertyKeys].allObjects;
-
-	return [NSDictionary dictionaryWithObjects:propertyKeys forKeys:propertyKeys];
++ (NSDictionary *)mtl_identityPropertyMapWithModel:(Class <MTLModel>)cls {
+	return MTLCopyPropertyKeyMapUsingBlock(cls, ^(NSString *propertyName, BOOL *__unused stop) {
+		return propertyName;
+	});
 }
 
 @end

@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "MTLModel.h"
 
 @interface NSDictionary (MTLMappingAdditions)
 
@@ -16,6 +17,6 @@
 //
 // Returns a dictionary that maps all properties of the given class to
 // themselves.
-+ (NSDictionary *)mtl_identityPropertyMapWithModel:(Class)class;
++ (NSDictionary *)mtl_identityPropertyMapWithModel:(Class <MTLModel>)cls;
 
 @end
