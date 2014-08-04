@@ -373,7 +373,7 @@ static NSString * const MTLJSONAdapterThrownExceptionErrorKey = @"MTLJSONAdapter
 	NSParameterAssert([modelClass conformsToProtocol:@protocol(MTLJSONSerializing)]);
 	
 	return MTLCopyPropertyKeyMapUsingBlock(modelClass, ^id(NSString *key, BOOL *__unused stop) {
-		SEL selector = MTLSelectorWithKeyPattern(key, "JSONTransformer");
+		SEL selector = MTLSelectorWithKeyPattern(NULL, key, "JSONTransformer");
 		if ([modelClass respondsToSelector:selector]) {
 			NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[modelClass methodSignatureForSelector:selector]];
 			invocation.target = modelClass;
@@ -434,7 +434,7 @@ static NSString * const MTLJSONAdapterThrownExceptionErrorKey = @"MTLJSONAdapter
 + (NSValueTransformer *)transformerForModelPropertiesOfClass:(Class)modelClass {
 	NSParameterAssert(modelClass != nil);
 
-	SEL selector = MTLSelectorWithKeyPattern(NSStringFromClass(modelClass), "JSONTransformer");
+	SEL selector = MTLSelectorWithKeyPattern(NULL, NSStringFromClass(modelClass), "JSONTransformer");
 	if (![self respondsToSelector:selector]) return nil;
 
 	NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[self methodSignatureForSelector:selector]];

@@ -391,7 +391,7 @@ static inline NSString *MTLPropertyCopyStaticString(const char *text, size_t len
 	
 	if (!_setter && !_flags.readonly) {
 		// use the property name to create a set<Foo>: setter
-		_setter = MTLSelectorWithCapitalizedKeyPattern("set", _name, ":");
+		_setter = MTLSelectorWithKeyPattern("set", _name, ":");
 	}
 	
 	return YES;
