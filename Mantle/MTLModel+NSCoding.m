@@ -34,7 +34,7 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 	[specifiedPropertyKeys minusSet:encodablePropertyKeysForClass(modelClass)];
 
 	if (specifiedPropertyKeys.count > 0) {
-		[NSException raise:NSInvalidArgumentException format:@"Cannot encode %@ securely, because keys are missing from +allowedSecureCodingClassesByPropertyKey: %@", modelClass, specifiedPropertyKeys];
+		@throw [NSException exceptionWithName:NSInvalidArgumentException reason:[NSString stringWithFormat:@"Cannot encode %@ securely, because keys are missing from +%@: %@", modelClass, NSStringFromSelector(@selector(allowedSecureCodingClassesByPropertyKey)), specifiedPropertyKeys] userInfo:nil];
 	}
 }
 
