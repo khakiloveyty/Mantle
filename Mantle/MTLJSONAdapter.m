@@ -212,9 +212,11 @@ static NSString * const MTLJSONAdapterThrownExceptionErrorKey = @"MTLJSONAdapter
 					return;
 				}
 			} else {
-				value = [transformer reverseTransformedValue:value] ?: NSNull.null;
+				value = [transformer reverseTransformedValue:value];
 			}
 		}
+
+		if (!value) { return; }
 
 		void (^createComponents)(id, NSString *) = ^(id obj, NSString *keyPath) {
 			NSArray *keyPathComponents = [keyPath componentsSeparatedByString:@"."];
