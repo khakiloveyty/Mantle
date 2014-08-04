@@ -29,8 +29,7 @@ SEL MTLSelectorWithKeyPattern(NSString *key, const char *suffix) __attribute__((
 //
 // Returns a selector, or NULL if the input strings cannot form a valid
 // selector.
-SEL MTLSelectorWithCapitalizedKeyPattern(const char *prefix, NSString *key, const char *suffix) __attribute__((overloadable, pure, nonnull(1, 2, 3)));
-SEL MTLSelectorWithCapitalizedKeyPattern(const char *prefix, const char *key, const char *suffix) __attribute__((overloadable, pure, nonnull(1, 2, 3)));
+SEL MTLSelectorWithCapitalizedKeyPattern(const char *prefix, NSString *key, const char *suffix) __attribute__((pure, nonnull(1, 2, 3)));
 
 // Enumerable object representing the property keys of the given model class.
 //

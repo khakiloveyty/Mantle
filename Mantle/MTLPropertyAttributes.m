@@ -25,6 +25,13 @@ static inline objc_property_t MTLPropertyFromProtocol(NSString *propertyName, Pr
 	return property;
 }
 
+static inline NSString *MTLPropertyCopyStaticString(const char *text, size_t len) {
+	if (len == 0) {
+		len = strlen(text);
+	}
+	return [[NSString alloc] initWithBytesNoCopy:(void *)text length:len encoding:NSUTF8StringEncoding freeWhenDone:NO];
+}
+
 @interface MTLPropertyAttributes () {
 	struct {
 		BOOL readonly;
@@ -219,37 +226,34 @@ static inline objc_property_t MTLPropertyFromProtocol(NSString *propertyName, Pr
 		_typeString = nil;
 		return NO;
 	}
-	
-	const char *const propertyName = property_getName(property);
+
+	_name = MTLPropertyCopyStaticString(property_getName(property), 0);
 	
 	const char *const attrString = property_getAttributes(property);
 	if (!attrString) {
-		NSAssert(NO, @"Could not get attribute string from property %s.", propertyName);
+		NSAssert(NO, @"Could not get attribute string from property %@.", _name);
 		return NO;
 	}
 	
 	if (attrString[0] != 'T') {
-		NSAssert(NO, @"Expected attribute string \"%s\" for property %s to start with 'T'.", attrString, propertyName);
+		NSAssert(NO, @"Expected attribute string \"%s\" for property %@ to start with 'T'.", attrString, _name);
 		return NO;
 	}
 	
 	const char *typeString = attrString + 1;
 	const char *next = NSGetSizeAndAlignment(typeString, NULL, NULL);
 	if (!next) {
-		NSAssert(NO, @"Could not read past type in attribute string \"%s\" for property %s.", attrString, propertyName);
+		NSAssert(NO, @"Could not read past type in attribute string \"%s\" for property %@.", attrString, _name);
 		return NO;
 	}
 	
 	size_t typeLength = next - typeString;
 	if (!typeLength) {
-		NSAssert(NO, @"Invalid type in attribute string \"%s\" for property %s.", attrString, propertyName);
+		NSAssert(NO, @"Invalid type in attribute string \"%s\" for property %@.", attrString, _name);
 		return NO;
 	}
-	
-	// copy the type string
-	_typeString = [[NSString alloc] initWithBytesNoCopy:(void *)typeString length:typeLength encoding:NSUTF8StringEncoding freeWhenDone:NO];
-	_name = [[NSString alloc] initWithBytesNoCopy:(void *)propertyName length:strlen(propertyName) encoding:NSUTF8StringEncoding freeWhenDone:NO];
-	
+	_typeString = MTLPropertyCopyStaticString(typeString, typeLength);
+
 	// if this is an object type, and immediately followed by a quoted string...
 	if (typeString[0] == *(@encode(id)) && typeString[1] == '"') {
 		// we should be able to extract a class name
@@ -257,7 +261,7 @@ static inline objc_property_t MTLPropertyFromProtocol(NSString *propertyName, Pr
 		next = strchr(className, '"');
 		
 		if (!next) {
-			NSAssert(next, @"Could not read class name in attribute string \"%s\" for property %s.", attrString, propertyName);
+			NSAssert(next, @"Could not read class name in attribute string \"%s\" for property %@.", attrString, _name);
 			return NO;
 		}
 		
@@ -318,7 +322,7 @@ static inline objc_property_t MTLPropertyFromProtocol(NSString *propertyName, Pr
 					size_t selectorLength = nextFlag - next;
 					
 					if (!selectorLength) {
-						NSAssert(NO, @"Found zero length selector name in attribute string \"%s\" for property %s.", attrString, propertyName);
+						NSAssert(NO, @"Found zero length selector name in attribute string \"%s\" for property %@.", attrString, _name);
 						return NO;
 					}
 					
@@ -362,7 +366,7 @@ static inline objc_property_t MTLPropertyFromProtocol(NSString *propertyName, Pr
 				break;
 				
 			case 't':
-				NSAssert(NO, @"Old-style type encoding is unsupported in attribute string \"%s\" for property %s.", attrString, propertyName);
+				NSAssert(NO, @"Old-style type encoding is unsupported in attribute string \"%s\" for property %@.", attrString, _name);
 				
 				// skip over this type encoding
 				while (*next != ',' && *next != '\0')
@@ -371,23 +375,23 @@ static inline objc_property_t MTLPropertyFromProtocol(NSString *propertyName, Pr
 				break;
 				
 			default:
-				NSAssert(NO, @"Unrecognized attribute string flag '%c' in attribute string \"%s\" for property %s.", flag, attrString, propertyName);
+				NSAssert(NO, @"Unrecognized attribute string flag '%c' in attribute string \"%s\" for property %@.", flag, attrString, _name);
 				break;
 		}
 	}
 	
 	if (next && *next != '\0') {
-		NSLog(@"Unparsed data \"%s\" in attribute string \"%s\" for property %s.", next, attrString, propertyName);
+		NSLog(@"Unparsed data \"%s\" in attribute string \"%s\" for property %@.", next, attrString, _name);
 	}
 	
 	if (!_getter) {
 		// use the property name as the getter by default
-		_getter = sel_registerName(propertyName);
+		_getter = NSSelectorFromString(_name);
 	}
 	
 	if (!_setter && !_flags.readonly) {
 		// use the property name to create a set<Foo>: setter
-		_setter = MTLSelectorWithCapitalizedKeyPattern("set", propertyName, ":");
+		_setter = MTLSelectorWithCapitalizedKeyPattern("set", _name, ":");
 	}
 	
 	return YES;

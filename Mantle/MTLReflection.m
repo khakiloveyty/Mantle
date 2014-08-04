@@ -24,7 +24,7 @@ SEL MTLSelectorWithKeyPattern(NSString *key, const char *suffix) {
 	return sel_registerName(selector);
 }
 
-SEL __attribute__((overloadable)) MTLSelectorWithCapitalizedKeyPattern(const char *prefix, NSString *key, const char *suffix) {
+SEL MTLSelectorWithCapitalizedKeyPattern(const char *prefix, NSString *key, const char *suffix) {
 	NSUInteger prefixLength = strlen(prefix);
 	NSUInteger suffixLength = strlen(suffix);
 
@@ -46,27 +46,6 @@ SEL __attribute__((overloadable)) MTLSelectorWithCapitalizedKeyPattern(const cha
 	memcpy(selector + prefixLength + initialLength + restLength, suffix, suffixLength);
 	selector[prefixLength + initialLength + restLength + suffixLength] = '\0';
 
-	return sel_registerName(selector);
-}
-
-SEL __attribute__((overloadable)) MTLSelectorWithCapitalizedKeyPattern(const char *prefix, const char *key, const char *suffix) {
-	size_t prefixLength = strlen(prefix);
-	size_t suffixLength = strlen(suffix);
-	
-	char initial = key[0];
-	if (prefixLength) initial = (char)toupper(initial);
-	size_t initialLength = 1;
-	
-	const char *rest = key + initialLength;
-	size_t restLength = strlen(rest);
-	
-	char selector[prefixLength + initialLength + restLength + suffixLength + 1];
-	memcpy(selector, prefix, prefixLength);
-	selector[prefixLength] = initial;
-	memcpy(selector + prefixLength + initialLength, rest, restLength);
-	memcpy(selector + prefixLength + initialLength + restLength, suffix, suffixLength);
-	selector[prefixLength + initialLength + restLength + suffixLength] = '\0';
-	
 	return sel_registerName(selector);
 }
 
