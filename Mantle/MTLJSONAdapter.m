@@ -22,7 +22,9 @@ const NSInteger MTLJSONAdapterErrorInvalidJSONDictionary = 3;
 const NSInteger MTLJSONAdapterErrorInvalidJSONMapping = 4;
 
 // An exception was thrown and caught.
+#if (defined(DEBUG) && !DEBUG) || !defined(DEBUG)
 const NSInteger MTLJSONAdapterErrorExceptionThrown = 1;
+#endif
 
 // Associated with the NSException that was caught.
 static NSString * const MTLJSONAdapterThrownExceptionErrorKey = @"MTLJSONAdapterThrownException";
