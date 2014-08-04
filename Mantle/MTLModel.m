@@ -8,7 +8,7 @@
 
 #import "NSError+MTLModelException.h"
 #import "MTLModel.h"
-#import "EXTRuntimeExtensions.h"
+#import "MTLPropertyAttributes.h"
 #import "MTLReflection.h"
 #import <objc/runtime.h>
 
@@ -81,13 +81,6 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 // +storageBehaviorForPropertyWithKey returned MTLPropertyStoragePermanent.
 + (NSSet *)permanentPropertyKeys;
 
-// Enumerates all properties of the receiver's class hierarchy, starting at the
-// receiver, and continuing up until (but not including) MTLModel.
-//
-// The given block will be invoked multiple times for any properties declared on
-// multiple classes in the hierarchy.
-+ (void)enumeratePropertiesUsingBlock:(void (^)(objc_property_t property, BOOL *stop))block;
-
 @end
 
 @implementation MTLModel
@@ -149,38 +142,12 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 
 #pragma mark Reflection
 
-+ (void)enumeratePropertiesUsingBlock:(void (^)(objc_property_t property, BOOL *stop))block {
-	Class cls = self;
-	BOOL stop = NO;
-
-	while (!stop && ![cls isEqual:MTLModel.class]) {
-		unsigned count = 0;
-		objc_property_t *properties = class_copyPropertyList(cls, &count);
-
-		cls = cls.superclass;
-		if (properties == NULL) continue;
-
-		for (unsigned i = 0; i < count; i++) {
-			block(properties[i], &stop);
-			if (stop) break;
-		}
-		
-		free(properties);
-	}
-}
-
 + (NSSet *)propertyKeys {
 	NSSet *cachedKeys = objc_getAssociatedObject(self, MTLModelCachedPropertyKeysKey);
 	if (cachedKeys != nil) return cachedKeys;
-
-	NSMutableSet *keys = [NSMutableSet set];
-
-	[self enumeratePropertiesUsingBlock:^(objc_property_t property, BOOL *__unused stop) {
-		NSString *key = @(property_getName(property));
-
-		if ([self storageBehaviorForPropertyWithKey:key] != MTLPropertyStorageNone) {
-			 [keys addObject:key];
-		}
+	
+	NSSet *keys = [MTLPropertyAttributes namesOfPropertiesFromClass:self untilClass:MTLModel.class passingTest:^BOOL(NSString *key) {
+		return [self storageBehaviorForPropertyWithKey:key] != MTLPropertyStorageNone;
 	}];
 
 	// It doesn't really matter if we replace another thread's work, since we do
@@ -218,23 +185,18 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 	return [self dictionaryWithValuesForKeys:keys.allObjects];
 }
 
-+ (MTLPropertyStorage)storageBehaviorForPropertyWithKey:(NSString *)propertyKey {
-	objc_property_t property = class_getProperty(self.class, propertyKey.UTF8String);
-	if (property == NULL) return MTLPropertyStorageNone;
++ (MTLPropertyStorage)defaultStorageBehaviorForProperty:(MTLPropertyAttributes *)attributes {
+	if (!attributes) { return MTLPropertyStorageNone; }
 
-	mtl_propertyAttributes *attributes = mtl_copyPropertyAttributes(property);
-	if (attributes == NULL) return MTLPropertyStorageNone;
-
-	MTLPropertyStorage ret;
-	if (attributes->readonly && attributes->ivar == NULL) {
-		ret = MTLPropertyStorageNone;
-	} else {
-		ret = MTLPropertyStoragePermanent;
+	if (attributes.readonly && attributes.ivar == NULL) {
+		return MTLPropertyStorageNone;
 	}
-	
-	free(attributes);
-	
-	return ret;
+ 
+	return MTLPropertyStoragePermanent;
+}
+
++ (MTLPropertyStorage)storageBehaviorForPropertyWithKey:(NSString *)propertyKey {
+	return [self defaultStorageBehaviorForProperty:[MTLPropertyAttributes propertyNamed:propertyKey class:self]];
 }
 
 #pragma mark Merging

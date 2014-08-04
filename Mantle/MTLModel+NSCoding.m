@@ -7,8 +7,9 @@
 //
 
 #import "MTLModel+NSCoding.h"
-#import "EXTRuntimeExtensions.h"
+#import "MTLPropertyAttributes.h"
 #import "MTLReflection.h"
+#import <objc/runtime.h>
 
 // Used in archives to store the modelVersion of the archived instance.
 static NSString * const MTLModelVersionKey = @"MTLModelVersion";
@@ -52,14 +53,10 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 	NSMutableDictionary *behaviors = [[NSMutableDictionary alloc] initWithCapacity:propertyKeys.count];
 
 	for (NSString *key in propertyKeys) {
-		objc_property_t property = class_getProperty(self, key.UTF8String);
-		NSAssert(property != NULL, @"Could not find property \"%@\" on %@", key, self);
+		MTLPropertyAttributes *attributes = [MTLPropertyAttributes propertyNamed:key class:self];
+		NSAssert(attributes != nil, @"Could not find property \"%@\" on %@", key, self);
 
-		mtl_propertyAttributes *attributes = mtl_copyPropertyAttributes(property);
-
-		MTLModelEncodingBehavior behavior = (attributes->weak ? MTLModelEncodingBehaviorConditional : MTLModelEncodingBehaviorUnconditional);
-		
-		free(attributes);
+		MTLModelEncodingBehavior behavior = (attributes.memoryPolicy == MTLPropertyMemoryPolicyWeak ? MTLModelEncodingBehaviorConditional : MTLModelEncodingBehaviorUnconditional);
 		
 		behaviors[key] = @(behavior);
 	}
@@ -79,25 +76,20 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 	NSMutableDictionary *allowedClasses = [[NSMutableDictionary alloc] initWithCapacity:propertyKeys.count];
 
 	for (NSString *key in propertyKeys) {
-		objc_property_t property = class_getProperty(self, key.UTF8String);
-		NSAssert(property != NULL, @"Could not find property \"%@\" on %@", key, self);
-
-		mtl_propertyAttributes *attributes = mtl_copyPropertyAttributes(property);
-
+		MTLPropertyAttributes *attributes = [MTLPropertyAttributes propertyNamed:key class:self];
+		NSAssert(attributes != nil, @"Could not find property \"%@\" on %@", key, self);
+		
 		// If the property is not of object or class type, assume that it's
 		// a primitive which would be boxed into an NSValue.
-		if (attributes->type[0] != '@' && attributes->type[0] != '#') {
-			free(attributes);
+		if (attributes.type[0] != *(@encode(id)) && attributes.type[0] != *(@encode(Class))) {
 			allowedClasses[key] = @[ NSValue.class ];
 			continue;
 		}
 
 		// Omit this property from the dictionary if its class isn't known.
-		if (attributes->objectClass != nil) {
-			allowedClasses[key] = @[ attributes->objectClass ];
+		if (attributes.objectClass != Nil) {
+			allowedClasses[key] = @[ attributes.objectClass ];
 		}
-		
-		free(attributes);
 	}
 
 	// It doesn't really matter if we replace another thread's work, since we do

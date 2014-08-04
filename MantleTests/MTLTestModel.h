@@ -95,6 +95,8 @@ extern const NSInteger MTLTestModelNameMissing;
 @property (readonly, nonatomic, weak) id weakProperty;
 @property (readonly, nonatomic, strong) id strongProperty;
 
+//@property (readonly, nonatomic) id notIvarBacked;
+
 @end
 
 @interface MTLBoolModel : MTLModel <MTLJSONSerializing>

@@ -8,14 +8,13 @@
 
 #import <objc/runtime.h>
 
-#import "NSDictionary+MTLJSONKeyPath.h"
-
-#import "EXTRuntimeExtensions.h"
+#import "MTLPropertyAttributes.h"
 #import "MTLJSONAdapter.h"
 #import "MTLModel.h"
 #import "MTLTransformerErrorHandling.h"
 #import "MTLReflection.h"
 #import "NSValueTransformer+MTLPredefinedTransformerAdditions.h"
+#import "NSDictionary+MTLJSONKeyPath.h"
 
 NSString * const MTLJSONAdapterErrorDomain = @"MTLJSONAdapterErrorDomain";
 const NSInteger MTLJSONAdapterErrorNoClassFound = 2;
@@ -388,17 +387,15 @@ static NSString * const MTLJSONAdapterThrownExceptionErrorKey = @"MTLJSONAdapter
 
 			continue;
 		}
-
-		objc_property_t property = class_getProperty(modelClass, key.UTF8String);
-
-		if (property == NULL) continue;
-
-		mtl_propertyAttributes *attributes = mtl_copyPropertyAttributes(property);
+		
+		MTLPropertyAttributes *attributes = [MTLPropertyAttributes propertyNamed:key class:modelClass];
+		
+		if (attributes == nil) continue;
 
 		NSValueTransformer *transformer = nil;
 
-		if (*(attributes->type) == *(@encode(id))) {
-			Class propertyClass = attributes->objectClass;
+		if (*(attributes.type) == *(@encode(id))) {
+			Class propertyClass = attributes.objectClass;
 
 			if (propertyClass != nil) {
 				transformer = [self transformerForModelPropertiesOfClass:propertyClass];
@@ -406,12 +403,10 @@ static NSString * const MTLJSONAdapterThrownExceptionErrorKey = @"MTLJSONAdapter
 
 			if (transformer == nil) transformer = [NSValueTransformer mtl_validatingTransformerForClass:NSObject.class];
 		} else {
-			transformer = [self transformerForModelPropertiesOfObjCType:attributes->type] ?: [NSValueTransformer mtl_validatingTransformerForClass:NSValue.class];
+			transformer = [self transformerForModelPropertiesOfObjCType:attributes.type] ?: [NSValueTransformer mtl_validatingTransformerForClass:NSValue.class];
 		}
 
 		if (transformer != nil) result[key] = transformer;
-		
-		free(attributes);
 	}
 
 	return result;
