@@ -716,6 +716,7 @@
 					"-Wno-gcc-compat",
 					"-Wno-unused-const-variable",
 					"-Wreturn-type",
+					"-Wshadow",
 				);
 			};
 			name = Debug;
@@ -782,6 +783,7 @@
 					"-Wno-gcc-compat",
 					"-Wno-unused-const-variable",
 					"-Wreturn-type",
+					"-Wshadow",
 				);
 			};
 			name = Release;
@@ -1019,6 +1021,7 @@
 					"-Wno-gcc-compat",
 					"-Wno-unused-const-variable",
 					"-Wreturn-type",
+					"-Wshadow",
 				);
 			};
 			name = Test;
@@ -1176,6 +1179,7 @@
 					"-Wno-gcc-compat",
 					"-Wno-unused-const-variable",
 					"-Wreturn-type",
+					"-Wshadow",
 				);
 			};
 			name = Profile;
@@ -1279,6 +1283,7 @@
 				DBC8363A19C532C90060648A /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		DBC8361319C532100060648A /* Build configuration list for PBXNativeTarget "Mantle Tests" */ = {
 			isa = XCConfigurationList;
@@ -1289,6 +1294,7 @@
 				DBC8363B19C532C90060648A /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		DBC8362E19C5322C0060648A /* Build configuration list for PBXNativeTarget "Mantle-iOS" */ = {
 			isa = XCConfigurationList;
@@ -1299,6 +1305,7 @@
 				DBC8363C19C532C90060648A /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		DBC8363119C5322C0060648A /* Build configuration list for PBXNativeTarget "Mantle-iOS Tests" */ = {
 			isa = XCConfigurationList;
@@ -1309,6 +1316,7 @@
 				DBC8363D19C532C90060648A /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

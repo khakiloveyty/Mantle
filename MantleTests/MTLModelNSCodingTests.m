@@ -56,7 +56,18 @@
 	MTLTestModel *model;
 	NSDictionary *values;
 
-	MTLTestModel *(^archiveAndUnarchiveModel)(void);
+	MTLTestModel *(^archiveAndUnarchiveModel)(void) DEPRECATED_ATTRIBUTE;
+}
+
+- (MTLTestModel *)archiveAndUnarchiveModel
+{
+    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:model];
+    XCTAssertNotNil(data);
+    
+    MTLTestModel *unarchivedModel = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+    XCTAssertNotNil(unarchivedModel);
+    
+    return unarchivedModel;
 }
 
 - (void)setUp
@@ -75,31 +86,18 @@
 	model = [[MTLTestModel alloc] initWithDictionary:values error:&error];
 	XCTAssertNotNil(model);
 	XCTAssertNil(error);
-
-	__weak typeof(self) blockSelf = self;
-	archiveAndUnarchiveModel = [^{
-		typeof(self) self = blockSelf;
-
-		NSData *data = [NSKeyedArchiver archivedDataWithRootObject:self->model];
-		XCTAssertNotNil(data);
-
-		MTLTestModel *unarchivedModel = [NSKeyedUnarchiver unarchiveObjectWithData:data];
-		XCTAssertNotNil(unarchivedModel);
-
-		return unarchivedModel;
-	} copy];
 }
 
 - (void)testUnconditionalProperties
 {
-	XCTAssertEqualObjects(archiveAndUnarchiveModel(), model);
+	XCTAssertEqualObjects([self archiveAndUnarchiveModel], model);
 }
 
 - (void)testExcludedProperties
 {
 	model.nestedName = @"foobar";
 
-	MTLTestModel *unarchivedModel = archiveAndUnarchiveModel();
+	MTLTestModel *unarchivedModel = [self archiveAndUnarchiveModel];
 	XCTAssertNil(unarchivedModel.nestedName);
 	XCTAssertNotEqualObjects(unarchivedModel, model);
 
@@ -111,7 +109,7 @@
 {
 	model.weakModel = emptyModel;
 
-	MTLTestModel *unarchivedModel = archiveAndUnarchiveModel();
+	MTLTestModel *unarchivedModel = [self archiveAndUnarchiveModel];
 	XCTAssertNil(unarchivedModel.weakModel);
 }
 

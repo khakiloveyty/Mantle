@@ -26,10 +26,7 @@ static inline objc_property_t MTLPropertyFromProtocol(NSString *propertyName, Pr
 }
 
 static inline NSString *MTLPropertyCopyStaticString(const char *text, size_t len) {
-	if (len == 0) {
-		len = strlen(text);
-	}
-	return [[NSString alloc] initWithBytesNoCopy:(void *)text length:len encoding:NSUTF8StringEncoding freeWhenDone:NO];
+    return [[NSString alloc] initWithBytesNoCopy:(void *)text length:(len ?: strlen(text)) encoding:NSUTF8StringEncoding freeWhenDone:NO];
 }
 
 @interface MTLPropertyAttributes () {

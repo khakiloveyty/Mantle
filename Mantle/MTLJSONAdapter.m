@@ -291,7 +291,6 @@ static NSString * const MTLJSONAdapterThrownExceptionErrorKey = @"MTLJSONAdapter
 			NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
 
 			for (NSString *keyPath in JSONKeyPaths) {
-				id value;
 				if (![JSONDictionary mtl_getValue:&value forJSONKeyPath:keyPath error:error]) {
 					*stop = YES;
 					return nil;
