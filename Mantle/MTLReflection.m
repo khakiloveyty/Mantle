@@ -49,9 +49,7 @@ MTLPropertyAttributes MTLGetAttributesForProperty(Class __unused cls, NSString *
         const char *typeString = attrString + 1;
         const char *next = NSGetSizeAndAlignment(typeString, NULL, NULL);
         NSCAssert(next, @"Could not read past type in attribute string \"%s\" for property %s.", attrString, name);
-        
-        size_t typeLength = next - typeString;
-        NSCAssert(typeLength, @"Invalid type in attribute string \"%s\" for property %s.", attrString, name);
+        NSCAssert(next - typeString, @"Invalid type in attribute string \"%s\" for property %s.", attrString, name);
         
         BOOL isObject = (typeString[0] == *(@encode(id)) || typeString[0] == *(@encode(Class)));
         // if this is an object type, and immediately followed by a quoted string...
