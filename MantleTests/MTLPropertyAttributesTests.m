@@ -7,6 +7,8 @@
 //  Released under the MIT license.
 //
 
+@import XCTest;
+@import Mantle;
 #import "MTLPropertyAttributes.h"
 
 @protocol RuntimeTestProtocol <NSObject>

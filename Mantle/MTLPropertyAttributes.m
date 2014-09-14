@@ -8,7 +8,7 @@
 
 #import "MTLPropertyAttributes.h"
 #import "MTLReflection.h"
-#import <objc/runtime.h>
+@import ObjectiveC.runtime;
 
 static inline objc_property_t MTLPropertyFromClass(NSString *propertyName, Class cls) {
 	const char *name = propertyName.UTF8String;

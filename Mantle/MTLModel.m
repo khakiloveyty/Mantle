@@ -10,7 +10,7 @@
 #import "MTLModel.h"
 #import "MTLPropertyAttributes.h"
 #import "MTLReflection.h"
-#import <objc/runtime.h>
+@import ObjectiveC.runtime;
 
 // Used to cache the reflection performed in +propertyKeys.
 static void *MTLModelCachedPropertyKeysKey = &MTLModelCachedPropertyKeysKey;
@@ -51,7 +51,7 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 		NSLog(@"*** Caught exception setting key \"%@\" : %@", key, ex);
 
 		// Fail fast in Debug builds.
-		#if DEBUG
+		#if (defined(DEBUG) && DEBUG)
 		@throw ex;
 		#else
 		if (error != NULL) {

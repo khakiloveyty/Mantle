@@ -6,10 +6,8 @@
 //  Copyright (c) 2013 GitHub. All rights reserved.
 //
 
-#import <objc/runtime.h>
-
-#import "MTLPropertyAttributes.h"
 #import "MTLJSONAdapter.h"
+#import "MTLPropertyAttributes.h"
 #import "MTLModel.h"
 #import "MTLTransformerErrorHandling.h"
 #import "MTLReflection.h"
@@ -338,7 +336,7 @@ static NSString * const MTLJSONAdapterThrownExceptionErrorKey = @"MTLJSONAdapter
 			NSLog(@"*** Caught exception %@ parsing JSON key path \"%@\" from: %@", ex, JSONKeyPaths, JSONDictionary);
 
 			// Fail fast in Debug builds.
-			#if DEBUG
+			#if (defined(DEBUG) && DEBUG)
 			@throw ex;
 			#else
 			if (error != NULL) {

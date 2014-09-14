@@ -6,7 +6,8 @@
 //  Copyright (c) 2013 GitHub. All rights reserved.
 //
 
-#import "NSError+MTLModelException.h"
+@import XCTest;
+@import Mantle;
 
 @interface MTLErrorModelExceptionTests : XCTestCase
 @end

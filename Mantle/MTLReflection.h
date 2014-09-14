@@ -6,8 +6,8 @@
 //  Copyright (c) 2013 GitHub. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-#import "MTLModel.h"
+@import Foundation;
+#import <Mantle/MTLModel.h>
 
 // Creates a selector from a key and a constant prefix and suffix.
 //

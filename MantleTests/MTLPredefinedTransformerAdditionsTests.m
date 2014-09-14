@@ -6,6 +6,9 @@
 //  Copyright (c) 2012 GitHub. All rights reserved.
 //
 
+@import XCTest;
+@import Mantle;
+
 #import "MTLTestModel.h"
 
 @interface MTLPredefinedTransformerAdditionsTests : XCTestCase {

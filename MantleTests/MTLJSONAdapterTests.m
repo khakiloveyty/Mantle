@@ -6,6 +6,9 @@
 //  Copyright (c) 2013 GitHub. All rights reserved.
 //
 
+@import XCTest;
+@import Mantle;
+
 #import "MTLTestModel.h"
 #import "MTLTestJSONAdapter.h"
 

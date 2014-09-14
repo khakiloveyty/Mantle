@@ -9,6 +9,9 @@
 //  See the LICENSE file for more information.
 //
 
+@import XCTest;
+@import Mantle;
+
 @interface MTLComparisonAdditionsTests : XCTestCase
 @end
 

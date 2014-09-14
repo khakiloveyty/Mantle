@@ -6,8 +6,7 @@
 //  Copyright (c) 2013 GitHub. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-
+@import Foundation;
 @protocol MTLModel;
 
 // A MTLModel object that supports being parsed from and serialized to JSON.

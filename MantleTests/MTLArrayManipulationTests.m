@@ -6,6 +6,9 @@
 //  Copyright (c) 2012 GitHub. All rights reserved.
 //
 
+@import XCTest;
+@import Mantle;
+
 @interface MTLArrayManipulationTests : XCTestCase
 
 @end

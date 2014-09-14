@@ -7,7 +7,7 @@
 //
 
 #import "MTLReflection.h"
-#import <objc/runtime.h>
+@import ObjectiveC.runtime;
 #import "MTLPropertyAttributes.h"
 
 SEL MTLSelectorWithKeyPattern(const char *prefix, NSString *key, const char *suffix) {

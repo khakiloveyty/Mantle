@@ -6,7 +6,7 @@
 //  Copyright (c) 2013 GitHub. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+@import Foundation;
 
 // The domain for errors originating from the MTLTransformerErrorHandling
 // protocol.

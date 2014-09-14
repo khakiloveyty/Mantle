@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 GitHub. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+@import Foundation;
 
 // Defines a property's storage behavior, which affects how it will be copied,
 // compared, and persisted.
