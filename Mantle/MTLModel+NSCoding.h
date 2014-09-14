@@ -7,7 +7,7 @@
 //
 
 @import Foundation;
-#import <Mantle/MTLModel.h>
+#import "MTLModel.h"
 
 // Defines how a MTLModel property key should be encoded into an archive.
 //

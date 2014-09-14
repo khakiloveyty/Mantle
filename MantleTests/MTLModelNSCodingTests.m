@@ -6,6 +6,7 @@
 //  Copyright (c) 2013 GitHub. All rights reserved.
 //
 
+@import Foundation;
 @import XCTest;
 @import Mantle;
 
@@ -55,8 +56,6 @@
 	MTLEmptyTestModel *emptyModel;
 	MTLTestModel *model;
 	NSDictionary *values;
-
-	MTLTestModel *(^archiveAndUnarchiveModel)(void) DEPRECATED_ATTRIBUTE;
 }
 
 - (MTLTestModel *)archiveAndUnarchiveModel

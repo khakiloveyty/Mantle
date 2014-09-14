@@ -6,6 +6,7 @@
 //  Copyright (c) 2012 GitHub. All rights reserved.
 //
 
+@import Foundation;
 @import XCTest;
 @import Mantle;
 
@@ -49,191 +50,6 @@
 
 @end
 
-#pragma mark - URL
-
-@interface MTLURLValueTransformerTests : MTLPredefinedTransformerAdditionsTests
-@end
-
-@implementation MTLURLValueTransformerTests
-
-- (void)setUp
-{
-	[super setUp];
-
-	transformer = [NSValueTransformer valueTransformerForName:MTLURLValueTransformerName];
-
-	XCTAssertNotNil(transformer);
-	XCTAssertTrue([transformer.class allowsReverseTransformation]);
-}
-
-- (void)testTransform
-{
-	NSString *URLString = @"http://www.github.com/";
-	XCTAssertEqualObjects([transformer transformedValue:URLString], [NSURL URLWithString:URLString]);
-	XCTAssertEqualObjects([transformer reverseTransformedValue:[NSURL URLWithString:URLString]], URLString);
-}
-
-- (void)testTransformNil
-{
-	XCTAssertNil([transformer transformedValue:nil]);
-	XCTAssertNil([transformer reverseTransformedValue:nil]);
-}
-
-- (void)testTransformFail
-{
-	[self commonTestTransformerWithInvalidInput:@"not a valid URL" invalidReverseInput:NSNull.null];
-}
-
-@end
-
-#pragma mark - Number
-
-@interface MTLNumberValueTransformerTests : MTLPredefinedTransformerAdditionsTests
-@end
-
-@implementation MTLNumberValueTransformerTests
-
-- (void)setUp
-{
-	[super setUp];
-
-	transformer = [NSValueTransformer valueTransformerForName:MTLBooleanValueTransformerName];
-
-	XCTAssertNotNil(transformer);
-	XCTAssertTrue([transformer.class allowsReverseTransformation]);
-}
-
-- (void)testTransform
-{
-	// Back these NSNumbers with ints, rather than booleans,
-	// to ensure that the value transformers are actually transforming.
-	NSNumber *booleanYES = @(1);
-	NSNumber *booleanNO = @(0);
-
-	XCTAssertEqualObjects([transformer transformedValue:booleanYES], @YES);
-	XCTAssertEqual([transformer transformedValue:booleanYES], (__bridge id)kCFBooleanTrue);
-
-	XCTAssertEqualObjects([transformer reverseTransformedValue:booleanYES], @YES);
-	XCTAssertEqual([transformer reverseTransformedValue:booleanYES], (__bridge id)kCFBooleanTrue);
-
-	XCTAssertEqualObjects([transformer transformedValue:booleanNO], @NO);
-	XCTAssertEqual([transformer transformedValue:booleanNO], (__bridge id)kCFBooleanFalse);
-
-	XCTAssertEqualObjects([transformer reverseTransformedValue:booleanNO], @NO);
-	XCTAssertEqual([transformer reverseTransformedValue:booleanNO], (__bridge id)kCFBooleanFalse);
-}
-
-- (void)testTransformNil
-{
-	XCTAssertNil([transformer transformedValue:nil]);
-	XCTAssertNil([transformer reverseTransformedValue:nil]);
-}
-
-- (void)testTransformFail
-{
-	[self commonTestTransformerWithInvalidInput:NSNull.null invalidReverseInput:NSNull.null];
-}
-
-@end
-
-#pragma mark - Dictionary
-
-@interface MTLDictionaryValueTransformerTests : MTLPredefinedTransformerAdditionsTests
-@end
-
-@implementation MTLDictionaryValueTransformerTests {
-	MTLTestModel *model;
-	NSDictionary *JSONDictionary;
-}
-
-- (void)setUp
-{
-	[super setUp];
-
-	model = [[MTLTestModel alloc] init];
-	JSONDictionary = [MTLJSONAdapter JSONDictionaryFromModel:model error:NULL];
-
-	transformer = [NSValueTransformer mtl_JSONDictionaryTransformerWithModelClass:MTLTestModel.class];
-
-	XCTAssertNotNil(transformer);
-}
-
-- (void)testTransform
-{
-	XCTAssertEqualObjects([transformer transformedValue:JSONDictionary], model);
-}
-
-- (void)testReverseTransform
-{
-	XCTAssertTrue([transformer.class allowsReverseTransformation]);
-	XCTAssertEqualObjects([transformer reverseTransformedValue:model], JSONDictionary);
-};
-
-- (void)testTransformFail
-{
-	[self commonTestTransformerWithInvalidInput:NSNull.null invalidReverseInput:NSNull.null];
-}
-
-@end
-
-#pragma mark - External array
-
-@interface MTLExternalArrayValueTransformerTests : MTLPredefinedTransformerAdditionsTests
-@end
-
-@implementation MTLExternalArrayValueTransformerTests {
-	NSArray *models;
-	NSArray *JSONDictionaries;
-}
-
-- (void)setUp
-{
-	[super setUp];
-
-	NSMutableArray *uniqueModels = [NSMutableArray array];
-	NSMutableArray *mutableDictionaries = [NSMutableArray array];
-
-	for (NSUInteger i = 0; i < 10; i++) {
-		MTLTestModel *model = [[MTLTestModel alloc] init];
-		model.count = i;
-
-		[uniqueModels addObject:model];
-
-		NSDictionary *dict = [MTLJSONAdapter JSONDictionaryFromModel:model error:NULL];
-		XCTAssertNotNil(dict);
-
-		[mutableDictionaries addObject:dict];
-	}
-
-	uniqueModels[2] = NSNull.null;
-	mutableDictionaries[2] = NSNull.null;
-
-	models = [uniqueModels copy];
-	JSONDictionaries = [mutableDictionaries copy];
-
-	transformer = [NSValueTransformer mtl_JSONArrayTransformerWithModelClass:MTLTestModel.class];
-	XCTAssertNotNil(transformer);
-	XCTAssertTrue([transformer.class allowsReverseTransformation]);
-}
-
-- (void)testTransform
-{
-	XCTAssertEqualObjects([transformer transformedValue:JSONDictionaries], models);
-}
-
-- (void)testReverseTransform
-{
-	XCTAssertTrue([transformer.class allowsReverseTransformation]);
-	XCTAssertEqualObjects([transformer reverseTransformedValue:models], JSONDictionaries);
-};
-
-- (void)testTransformFail
-{
-	[self commonTestTransformerWithInvalidInput:NSNull.null invalidReverseInput:NSNull.null];
-}
-
-@end
-
 #pragma mark - Array mapping
 
 @interface MTLArrayMappingTransformerTests : MTLPredefinedTransformerAdditionsTests
@@ -263,7 +79,11 @@
 
 - (void)testWithReversibleTransformer
 {
-	NSValueTransformer *appliedTransformer = [NSValueTransformer valueTransformerForName:MTLURLValueTransformerName];
+	NSValueTransformer *appliedTransformer = [MTLValueTransformer transformerUsingForwardBlock:^(NSString *str, BOOL *__unused success, __unused NSError **error) {
+        return [NSURL URLWithString:str];
+    } reverseBlock:^(NSURL *URL, BOOL *__unused success, __unused NSError **error) {
+        return URL.absoluteString;
+    }];
 	transformer = [NSValueTransformer mtl_arrayMappingTransformerWithTransformer:appliedTransformer];
 	XCTAssertNotNil(transformer);
 	XCTAssertTrue([transformer.class allowsReverseTransformation]);
@@ -276,7 +96,7 @@
 
 - (void)testWithForwardTransformer
 {
-	NSValueTransformer *appliedTransformer = [MTLValueTransformer transformerUsingForwardBlock:^(NSString *str, BOOL *__unused success, __unused NSError **error) {
+	MTLValueTransformer *appliedTransformer = [MTLValueTransformer transformerUsingForwardBlock:^(NSString *str, BOOL *__unused success, __unused NSError **error) {
 		return [NSURL URLWithString:str];
 	}];
 	transformer = [NSValueTransformer mtl_arrayMappingTransformerWithTransformer:appliedTransformer];
@@ -316,7 +136,7 @@ static inline NSDictionary *MTLValueMappingTransformerMap(void) {
 {
 	[super setUp];
 	
-	transformer = [NSValueTransformer mtl_valueMappingTransformerWithDictionary:MTLValueMappingTransformerMap()];
+	transformer = [NSValueTransformer mtl_valueMappingTransformerWithDictionary:MTLValueMappingTransformerMap() defaultValue:nil reverseDefaultValue:nil];
 	
 	XCTAssertNotNil(transformer);
 }

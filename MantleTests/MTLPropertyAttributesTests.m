@@ -7,17 +7,12 @@
 //  Released under the MIT license.
 //
 
+@import Foundation;
 @import XCTest;
 @import Mantle;
-#import "MTLPropertyAttributes.h"
+#import "MTLReflection.h"
 
-@protocol RuntimeTestProtocol <NSObject>
-
-@property (nonatomic, weak) NSObject *weakObject;
-
-@end
-
-@interface RuntimeTestClass : NSObject <RuntimeTestProtocol>
+@interface RuntimeTestClass : NSObject
 
 @property (nonatomic, assign, getter = isNormalBool, readonly) BOOL normalBool;
 @property (nonatomic, strong, getter = whoopsWhatArray, setter = setThatArray:) NSArray *array;
@@ -50,133 +45,73 @@
 @implementation MTLPropertyAttributesTests
 
 - (void)testPropertyAttributesForBOOL {
-	MTLPropertyAttributes *attributes = nil;
-	XCTAssertNoThrow(attributes = [MTLPropertyAttributes propertyNamed:@"normalBool" class:RuntimeTestClass.class]);
-	XCTAssertNotNil(attributes);
+    MTLPropertyAttributes attributes = MTLGetAttributesForProperty(RuntimeTestClass.class, @"normalBool");
+	XCTAssertNotEqual(attributes.name, NULL);
 
 	XCTAssertTrue(attributes.readonly);
 	XCTAssertTrue(attributes.nonatomic);
-	XCTAssertFalse(attributes.canBeCollected);
 	XCTAssertFalse(attributes.dynamic);
 	XCTAssertEqual(attributes.memoryPolicy, MTLPropertyMemoryPolicyAssign);
 
-	XCTAssertEqual(attributes.getter, @selector(isNormalBool));
-	XCTAssertEqual(attributes.setter, NULL);
-
-	XCTAssertFalse(strcmp(attributes.ivar, "_normalBool"));
-	XCTAssertTrue(strlen(attributes.type) > 0);
-
-	NSUInteger size = 0;
-	NSGetSizeAndAlignment(attributes.type, &size, NULL);
-	XCTAssertTrue(size > 0);
-
+    XCTAssertTrue(attributes.hasIvar);
+    XCTAssertFalse(attributes.isObjectType);
 	XCTAssertNil(attributes.objectClass);
 }
 
 - (void)testPropertyAttributesForArray {
-	MTLPropertyAttributes *attributes = nil;
-	XCTAssertNoThrow(attributes = [MTLPropertyAttributes propertyNamed:@"array" class:RuntimeTestClass.class]);
-	XCTAssertNotNil(attributes);
+    MTLPropertyAttributes attributes = MTLGetAttributesForProperty(RuntimeTestClass.class, @"array");
+    XCTAssertNotEqual(attributes.name, NULL);
 
 	XCTAssertFalse(attributes.readonly);
 	XCTAssertTrue(attributes.nonatomic);
-	XCTAssertFalse(attributes.canBeCollected);
 	XCTAssertFalse(attributes.dynamic);
 	XCTAssertEqual(attributes.memoryPolicy, MTLPropertyMemoryPolicyRetain);
 
-	XCTAssertEqual(attributes.getter, @selector(whoopsWhatArray));
-	XCTAssertEqual(attributes.setter, @selector(setThatArray:));
-
-	XCTAssertFalse(strcmp(attributes.ivar, "m_array"));
-	XCTAssertTrue(strlen(attributes.type) > 0);
-
-	NSUInteger size = 0;
-	NSGetSizeAndAlignment(attributes.type, &size, NULL);
-	XCTAssertTrue(size > 0);
-
+    XCTAssertTrue(attributes.hasIvar);
+    XCTAssertTrue(attributes.isObjectType);
 	XCTAssertEqualObjects(attributes.objectClass, NSArray.class);
 }
 
 - (void)testPropertyAttributesForNormalString {
-	MTLPropertyAttributes *attributes = nil;
-	XCTAssertNoThrow(attributes = [MTLPropertyAttributes propertyNamed:@"normalString" class:RuntimeTestClass.class]);
-	XCTAssertNotNil(attributes);
+    MTLPropertyAttributes attributes = MTLGetAttributesForProperty(RuntimeTestClass.class, @"normalString");
+    XCTAssertNotEqual(attributes.name, NULL);
 
 	XCTAssertFalse(attributes.readonly);
 	XCTAssertFalse(attributes.nonatomic);
-	XCTAssertFalse(attributes.canBeCollected);
 	XCTAssertFalse(attributes.dynamic);
 	XCTAssertEqual(attributes.memoryPolicy, MTLPropertyMemoryPolicyCopy);
-
-	XCTAssertEqual(attributes.getter, @selector(normalString));
-	XCTAssertEqual(attributes.setter, @selector(setNormalString:));
-
-	XCTAssertFalse(strcmp(attributes.ivar, "normalString"));
-	XCTAssertTrue(strlen(attributes.type) > 0);
-
-	NSUInteger size = 0;
-	NSGetSizeAndAlignment(attributes.type, &size, NULL);
-	XCTAssertTrue(size > 0);
-
+    
+    XCTAssertTrue(attributes.hasIvar);
+    XCTAssertTrue(attributes.isObjectType);
 	XCTAssertEqualObjects(attributes.objectClass, NSString.class);
 }
 
 - (void)testPropertyAttributesForUntypedObject {
-	MTLPropertyAttributes *attributes = nil;
-	XCTAssertNoThrow(attributes = [MTLPropertyAttributes propertyNamed:@"untypedObject" class:RuntimeTestClass.class]);
-	XCTAssertNotNil(attributes);
+    MTLPropertyAttributes attributes = MTLGetAttributesForProperty(RuntimeTestClass.class, @"untypedObject");
+    XCTAssertNotEqual(attributes.name, NULL);
 
 	XCTAssertFalse(attributes.readonly);
 	XCTAssertFalse(attributes.nonatomic);
-	XCTAssertFalse(attributes.canBeCollected);
 	XCTAssertTrue(attributes.dynamic);
 	XCTAssertEqual(attributes.memoryPolicy, MTLPropertyMemoryPolicyAssign);
 
-	XCTAssertEqual(attributes.getter, @selector(untypedObject));
-	XCTAssertEqual(attributes.setter, @selector(setUntypedObject:));
-
-	XCTAssertEqual(attributes.ivar, NULL);
-	XCTAssertTrue(strlen(attributes.type) > 0);
-
-	NSUInteger size = 0;
-	NSGetSizeAndAlignment(attributes.type, &size, NULL);
-	XCTAssertTrue(size > 0);
-
+    XCTAssertFalse(attributes.hasIvar);
+    XCTAssertTrue(attributes.isObjectType);
 	XCTAssertNil(attributes.objectClass);
 }
 
-- (void)commonTestPropertyAttributesForWeakObject:(MTLPropertyAttributes *)attributes {
-	XCTAssertNotNil(attributes);
-
-	XCTAssertFalse(attributes.readonly);
-	XCTAssertTrue(attributes.nonatomic);
-	XCTAssertFalse(attributes.canBeCollected);
-	XCTAssertFalse(attributes.dynamic);
-	XCTAssertEqual(attributes.memoryPolicy, MTLPropertyMemoryPolicyWeak);
-
-	XCTAssertEqual(attributes.getter, @selector(weakObject), @"");
-	XCTAssertEqual(attributes.setter, @selector(setWeakObject:), @"");
-
-	XCTAssertEqual(attributes.ivar, NULL);
-	XCTAssertTrue(strlen(attributes.type) > 0);
-
-	NSUInteger size = 0;
-	NSGetSizeAndAlignment(attributes.type, &size, NULL);
-	XCTAssertTrue(size > 0);
-
-	XCTAssertEqualObjects(attributes.objectClass, NSObject.class);
-}
-
 - (void)testPropertyAttributesForWeakObject {
-	MTLPropertyAttributes *attributes = nil;
-	XCTAssertNoThrow(attributes = [MTLPropertyAttributes propertyNamed:@"weakObject" class:RuntimeTestClass.class]);
-	[self commonTestPropertyAttributesForWeakObject:attributes];
-}
-
-- (void)testPropertyAttributesForWeakObjectInProtocol {
-	MTLPropertyAttributes *attributes = nil;
-	XCTAssertNoThrow(attributes = [MTLPropertyAttributes propertyNamed:@"weakObject" protocol:@protocol(RuntimeTestProtocol)]);
-	[self commonTestPropertyAttributesForWeakObject:attributes];
+    MTLPropertyAttributes attributes = MTLGetAttributesForProperty(RuntimeTestClass.class, @"weakObject");
+    XCTAssertNotEqual(attributes.name, NULL);
+    
+    XCTAssertFalse(attributes.readonly);
+    XCTAssertTrue(attributes.nonatomic);
+    XCTAssertFalse(attributes.dynamic);
+    XCTAssertEqual(attributes.memoryPolicy, MTLPropertyMemoryPolicyWeak);
+    
+    XCTAssertFalse(attributes.hasIvar);
+    XCTAssertTrue(attributes.isObjectType);
+    XCTAssertEqualObjects(attributes.objectClass, NSObject.class);
 }
 
 @end

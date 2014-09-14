@@ -6,11 +6,10 @@
 //  Copyright (c) 2012 GitHub. All rights reserved.
 //
 
-#import "NSError+MTLModelException.h"
 #import "MTLModel.h"
-#import "MTLPropertyAttributes.h"
 #import "MTLReflection.h"
 @import ObjectiveC.runtime;
+@import ObjectiveC.message;
 
 // Used to cache the reflection performed in +propertyKeys.
 static void *MTLModelCachedPropertyKeysKey = &MTLModelCachedPropertyKeysKey;
@@ -53,13 +52,18 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 		// Fail fast in Debug builds.
 		#if (defined(DEBUG) && DEBUG)
 		@throw ex;
-		#else
+		#endif
+        
 		if (error != NULL) {
-			*error = [NSError mtl_modelErrorWithException:ex];
+            NSDictionary *userInfo = @{
+                NSLocalizedDescriptionKey: ex.description,
+                NSLocalizedFailureReasonErrorKey: ex.reason
+            };
+
+            *error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSKeyValueValidationError userInfo:userInfo];
 		}
 
 		return NO;
-		#endif
 	}
 }
 
@@ -82,8 +86,8 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 + (void)generateAndCachePropertyKeys {
 	NSMutableSet *transitoryKeys = [NSMutableSet set];
 	NSMutableSet *permanentKeys = [NSMutableSet set];
-
-	[MTLPropertyAttributes enumeratePropertiesFromClass:self untilClass:MTLModel.class usingBlock:^(NSString *propertyKey, BOOL *__unused stop) {
+    
+    MTLEnumeratePropertiesUsingBlock(self, MTLModel.class, ^(NSString *propertyKey){
 		switch ([self storageBehaviorForPropertyWithKey:propertyKey]) {
 			case MTLPropertyStorageNone:
 				break;
@@ -96,7 +100,7 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 				[permanentKeys addObject:propertyKey];
 				break;
 		}
-	}];
+	});
 
 	// It doesn't really matter if we replace another thread's work, since we do
 	// it atomically and the result should be the same.
@@ -113,7 +117,7 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 
 - (instancetype)init {
 	// Nothing special by default, but we have a declaration in the header.
-	return [super init];
+	return (self = [super init]);
 }
 
 - (instancetype)initWithDictionary:(NSDictionary *)dictionary error:(NSError **)error {
@@ -165,18 +169,20 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 	});
 }
 
-+ (MTLPropertyStorage)defaultStorageBehaviorForProperty:(MTLPropertyAttributes *)attributes {
-	if (!attributes) { return MTLPropertyStorageNone; }
-
-	if (attributes.readonly && attributes.ivar == NULL) {
-		return MTLPropertyStorageNone;
-	}
- 
-	return MTLPropertyStoragePermanent;
++ (MTLPropertyStorage)defaultStorageBehaviorForProperty:(MTLPropertyAttributes)attributes {
+    if (!attributes.name) {
+        return MTLPropertyStorageNone;
+    }
+    
+    if (attributes.readonly && !attributes.hasIvar) {
+        return MTLPropertyStorageNone;
+    }
+    
+    return MTLPropertyStoragePermanent;
 }
 
 + (MTLPropertyStorage)storageBehaviorForPropertyWithKey:(NSString *)propertyKey {
-	return [self defaultStorageBehaviorForProperty:[MTLPropertyAttributes propertyNamed:propertyKey class:self]];
+    return [self defaultStorageBehaviorForProperty:MTLGetAttributesForProperty(self, propertyKey)];
 }
 
 #pragma mark Merging
@@ -185,20 +191,12 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 	NSParameterAssert(key != nil);
 
 	SEL selector = MTLSelectorWithKeyPattern("merge", key, "FromModel:");
-	if (![self respondsToSelector:selector]) {
-		if (model != nil) {
-			[self setValue:[model valueForKey:key] forKey:key];
-		}
-
-		return;
-	}
-
-	NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[self methodSignatureForSelector:selector]];
-	invocation.target = self;
-	invocation.selector = selector;
-
-	[invocation setArgument:&model atIndex:2];
-	[invocation invoke];
+    if ([self respondsToSelector:selector]) {
+        void(*msgSend)(MTLModel *, SEL, NSObject<MTLModel> *) = (void(*)(MTLModel *, SEL, NSObject<MTLModel> *))objc_msgSend;
+        msgSend(self, selector, model);
+    } else if (model != nil) {
+        [self setValue:[model valueForKey:key] forKey:key];
+    }
 }
 
 - (void)mergeValuesForKeysFromModel:(id<MTLModel>)model {
@@ -227,7 +225,7 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 #pragma mark NSCopying
 
 - (instancetype)copyWithZone:(NSZone *)zone {
-	return [[self.class allocWithZone:zone] initWithDictionary:self.dictionaryValue error:NULL];
+	return [(MTLModel *)[self.class allocWithZone:zone] initWithDictionary:self.dictionaryValue error:NULL];
 }
 
 #pragma mark NSObject
@@ -235,7 +233,7 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 - (NSString *)description {
 	NSDictionary *permanentProperties = [self dictionaryWithValuesForKeys:self.class.permanentPropertyKeys.allObjects];
 
-	return [NSString stringWithFormat:@"<%@: %p> %@", self.class, self, permanentProperties];
+	return [NSString stringWithFormat:@"<%@: %p> %@", self.class, (__bridge void *)self, permanentProperties];
 }
 
 - (NSUInteger)hash {

@@ -7,9 +7,9 @@
 //
 
 #import "MTLModel+NSCoding.h"
-#import "MTLPropertyAttributes.h"
 #import "MTLReflection.h"
 @import ObjectiveC.runtime;
+@import ObjectiveC.message;
 
 // Used in archives to store the modelVersion of the archived instance.
 static NSString * const MTLModelVersionKey = @"MTLModelVersion";
@@ -50,9 +50,8 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 
 + (NSDictionary *)encodingBehaviorsByPropertyKey {
 	return MTLCopyPropertyKeyMapUsingBlock(self, ^id(NSString *key, BOOL *__unused stop) {
-		MTLPropertyAttributes *attributes = [MTLPropertyAttributes propertyNamed:key class:self];
-		NSAssert(attributes != nil, @"Could not find property \"%@\" on %@", key, self);
-		
+        MTLPropertyAttributes attributes = MTLGetAttributesForProperty(self, key);
+		NSAssert(attributes.name, @"Could not find property \"%@\" on %@", key, self);
 		return @(attributes.memoryPolicy == MTLPropertyMemoryPolicyWeak ? MTLModelEncodingBehaviorConditional : MTLModelEncodingBehaviorUnconditional);
 	});
 }
@@ -67,10 +66,10 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 			return nil;
 		}
 
-		MTLPropertyAttributes *attributes = [MTLPropertyAttributes propertyNamed:key class:self];
-		NSAssert(attributes != nil, @"Could not find property \"%@\" on %@", key, self);
+        MTLPropertyAttributes attributes = MTLGetAttributesForProperty(self, key);
+		NSAssert(attributes.name, @"Could not find property \"%@\" on %@", key, self);
 
-		if (attributes.type[0] != *(@encode(id)) && attributes.type[0] != *(@encode(Class))) {
+		if (!attributes.isObjectType) {
 			// If the property is not of object or class type, assume that it's
 			// a primitive which would be boxed into an NSValue.
 			return @[ NSValue.class ];
@@ -94,16 +93,8 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 
 	SEL selector = MTLSelectorWithKeyPattern("decode", key, "WithCoder:modelVersion:");
 	if ([self respondsToSelector:selector]) {
-		NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[self methodSignatureForSelector:selector]];
-		invocation.target = self;
-		invocation.selector = selector;
-		[invocation setArgument:&coder atIndex:2];
-		[invocation setArgument:&modelVersion atIndex:3];
-		[invocation invoke];
-
-		__unsafe_unretained id result = nil;
-		[invocation getReturnValue:&result];
-		return result;
+        id(*msgSend)(MTLModel *, SEL, NSCoder *, NSUInteger) = (id(*)(MTLModel *, SEL, NSCoder *, NSUInteger))objc_msgSend;
+        return msgSend(self, selector, coder, modelVersion);
 	}
 
 	@try {
@@ -190,7 +181,8 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 
 #pragma mark NSSecureCoding
 
-+ (BOOL)supportsSecureCoding {
++ (BOOL)supportsSecureCoding __unused
+{
 	// Disable secure coding support by default, so subclasses are forced to
 	// opt-in by conforming to the protocol and overriding this method.
 	//

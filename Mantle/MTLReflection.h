@@ -7,7 +7,99 @@
 //
 
 @import Foundation;
-#import <Mantle/MTLModel.h>
+#import "MTLModelProtocol.h"
+
+/**
+ * Describes the memory management policy of a property.
+ */
+typedef NS_ENUM(int8_t, MTLPropertyMemoryPolicy) {
+    /**
+     * The value is assigned.
+     */
+    MTLPropertyMemoryPolicyAssign,
+    
+    /**
+     * The value is retained.
+     */
+    MTLPropertyMemoryPolicyRetain,
+    
+    /**
+     * The value is copied.
+     */
+    MTLPropertyMemoryPolicyCopy,
+    
+    /**
+     * The value is zeroing-weak-referenced.
+     */
+    MTLPropertyMemoryPolicyWeak
+};
+
+/**
+ * Describes the attributes and type information of an Objective-C property.
+ */
+typedef const struct {
+    /**
+     * Returns property attributes for a given property on a given class.
+     */
+    const char *name;
+    
+    /**
+     * Whether this property was declared with the \c readonly attribute.
+     */
+    BOOL readonly;
+    
+    /**
+     * Whether this property was declared with the \c nonatomic attribute.
+     */
+    BOOL nonatomic;
+    
+    /**
+     * Whether this property is defined with \c \@dynamic.
+     */
+    BOOL dynamic;
+    
+    /**
+     * The memory management policy for this property. This will always be
+     * #MTLPropertyMemoryPolicyAssign if #readonly is \c YES.
+     */
+    MTLPropertyMemoryPolicy memoryPolicy;
+    
+    /**
+     * Whether this property was not used with \c @synthesize or is implemented
+     * dynamically.
+     */
+    BOOL hasIvar;
+    
+    /**
+     * Whether this property is typed as an Objective-C compatible object.
+     */
+    BOOL isObjectType;
+    
+    /**
+     * If this property is defined as being an instance of a specific class,
+     * this will be the class object representing it.
+     *
+     * This will be \c Nil if the property was defined as type \c id, if the
+     * property is not of an object type, or if the class could not be found at
+     * runtime.
+     */
+    Class objectClass;
+} MTLPropertyAttributes;
+
+/**
+ * Enumerates the names of properties for the given class hierarchy, starting at
+ * the given class, and continuing up until (but not including) the given class.
+ *
+ * The given block will be invoked multiple times for any properties declared on
+ * each class in the hierarchy.
+ */
+extern void MTLEnumeratePropertiesUsingBlock(Class fromCls, Class endClass, void(^block)(NSString *propertyName));
+
+/**
+ * Returns property attributes for a given property on a given class.
+ */
+extern MTLPropertyAttributes MTLGetAttributesForProperty(Class cls, NSString *propertyName);
+
 
 // Creates a selector from a key and a constant prefix and suffix.
 //

@@ -6,6 +6,7 @@
 //  Copyright (c) 2012 GitHub. All rights reserved.
 //
 
+@import Foundation;
 @import XCTest;
 @import Mantle;
 

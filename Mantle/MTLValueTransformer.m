@@ -1,5 +1,5 @@
 //
-//  MTLValueTransformer.m
+//  MTLValueTransformer.h
 //  Mantle
 //
 //  Created by Justin Spahr-Summers on 2012-09-11.
@@ -7,6 +7,37 @@
 //
 
 #import "MTLValueTransformer.h"
+
+NSString *const MTLTransformerErrorHandlingErrorDomain = @"MTLTransformerErrorHandlingErrorDomain";
+
+const NSInteger MTLTransformerErrorHandlingErrorInvalidInput = 1;
+
+NSString *const MTLTransformerErrorHandlingInputValueErrorKey = @"MTLTransformerErrorHandlingInputValueErrorKey";
+
+@implementation NSValueTransformer (MTLValueTransformer)
+
+- (NSValueTransformer *)mtl_invertedTransformer {
+    NSParameterAssert(self.class.allowsReverseTransformation);
+    
+    if ([self conformsToProtocol:@protocol(MTLTransformerErrorHandling)]) {
+        NSParameterAssert([self respondsToSelector:@selector(reverseTransformedValue:success:error:)]);
+        NSValueTransformer<MTLTransformerErrorHandling> *errorHandlingSelf = (id)self;
+        
+        return [MTLValueTransformer transformerUsingForwardBlock:^(id value, BOOL *success, NSError **error){
+            return [errorHandlingSelf reverseTransformedValue:value success:success error:error];
+        } reverseBlock:^(id value, BOOL *success, NSError **error){
+            return [errorHandlingSelf transformedValue:value success:success error:error];
+        }];
+    }
+    
+    return [MTLValueTransformer transformerUsingForwardBlock:^(id value, BOOL *__unused success, __unused NSError **error) {
+        return [self reverseTransformedValue:value];
+    } reverseBlock:^(id value, BOOL *__unused success, __unused NSError **error) {
+        return [self transformedValue:value];
+    }];
+}
+
+@end
 
 //
 // Any MTLValueTransformer supporting reverse transformation. Necessary because
@@ -61,10 +92,8 @@
 }
 
 - (id)transformedValue:(id)value {
-	NSError *__unused error = nil;
 	BOOL success = YES;
-
-	return self.forwardBlock(value, &success, &error);
+	return self.forwardBlock(value, &success, NULL);
 }
 
 - (id)transformedValue:(id)value success:(BOOL *)outerSuccess error:(NSError **)outerError {
@@ -97,10 +126,8 @@
 }
 
 - (id)reverseTransformedValue:(id)value {
-	NSError *__unused error = nil;
 	BOOL success = YES;
-
-	return self.reverseBlock(value, &success, &error);
+	return self.reverseBlock(value, &success, NULL);
 }
 
 - (id)reverseTransformedValue:(id)value success:(BOOL *)outerSuccess error:(NSError **)outerError {
@@ -115,36 +142,8 @@
 	return transformedValue;
 }
 
-@end
-
-
-@implementation MTLValueTransformer (Deprecated)
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-implementations"
-
-+ (instancetype)transformerWithBlock:(id (^)(id))transformationBlock {
-	return [self transformerUsingForwardBlock:^(id value, BOOL *__unused success, __unused NSError **error) {
-		return transformationBlock(value);
-	}];
+- (NSValueTransformer *)mtl_invertedTransformer {
+    return [MTLValueTransformer transformerUsingForwardBlock:self.reverseBlock reverseBlock:self.forwardBlock];
 }
-
-+ (instancetype)reversibleTransformerWithBlock:(id (^)(id))transformationBlock {
-	return [self transformerUsingReversibleBlock:^(id value, BOOL *__unused success, __unused NSError **error) {
-		return transformationBlock(value);
-	}];
-}
-
-+ (instancetype)reversibleTransformerWithForwardBlock:(id (^)(id))forwardBlock reverseBlock:(id (^)(id))reverseBlock {
-	return [self
-		transformerUsingForwardBlock:^(id value, BOOL *__unused success, __unused NSError **error) {
-			return forwardBlock(value);
-		}
-		reverseBlock:^(id value, BOOL *__unused success, __unused NSError **error) {
-			return reverseBlock(value);
-		}];
-}
-
-#pragma clang diagnostic pop
 
 @end

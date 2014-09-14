@@ -17,30 +17,25 @@ extern const NSInteger MTLTestModelNameMissing;
 @interface MTLEmptyTestModel : MTLModel
 @end
 
-@interface MTLTestModel : MTLModel <MTLJSONSerializing>
+@interface MTLTestModel : MTLModel
 
 // Defaults to 1. This changes the behavior of some of the receiver's methods to
 // emulate a migration.
 + (void)setModelVersion:(NSUInteger)version;
 
 // Must be less than 10 characters.
-//
-// This property is associated with a "username" key in JSON.
 @property (nonatomic, copy) NSString *name;
 
 // Defaults to 1. When two models are merged, their counts are added together.
-//
-// This property is a string in JSON.
 @property (nonatomic, assign) NSUInteger count;
 
-// This property is associated with a "nested.name" key path in JSON. This
-// property should not be encoded into new archives.
+// This property should not be encoded into new archives.
 @property (nonatomic, copy) NSString *nestedName;
 
-// Should not be stored in the dictionary value or JSON.
+// Should not be stored in the dictionary value.
 @property (nonatomic, copy, readonly) NSString *dynamicName;
 
-// Should not be stored in JSON, has MTLPropertyStorageTransitory.
+// Has MTLPropertyStorageTransitory.
 @property (nonatomic, weak) MTLEmptyTestModel *weakModel;
 
 @end
@@ -53,18 +48,7 @@ extern const NSInteger MTLTestModelNameMissing;
 
 @end
 
-@interface MTLArrayTestModel : MTLModel <MTLJSONSerializing>
-
-// This property is associated with a "users.username" key in JSON.
-@property (nonatomic, copy) NSString *names;
-
-@end
-
-// Parses MTLTestModel objects from JSON instead.
-@interface MTLSubstitutingTestModel : MTLModel <MTLJSONSerializing>
-@end
-
-@interface MTLValidationModel : MTLModel <MTLJSONSerializing>
+@interface MTLValidationModel : MTLModel
 
 // Defaults to nil, which is not considered valid.
 @property (nonatomic, copy) NSString *name;
@@ -75,20 +59,6 @@ extern const NSInteger MTLTestModelNameMissing;
 @interface MTLSelfValidatingModel : MTLValidationModel
 @end
 
-@interface MTLURLModel : MTLModel <MTLJSONSerializing>
-
-// Defaults to http://github.com.
-@property (nonatomic, strong) NSURL *URL;
-
-@end
-
-// Conforms to MTLJSONSerializing but does not inherit from the MTLModel class.
-@interface MTLConformingModel : NSObject <MTLJSONSerializing>
-
-@property (nonatomic, copy) NSString *name;
-
-@end
-
 @interface MTLStorageBehaviorModel : MTLModel
 
 @property (readonly, nonatomic, assign) BOOL primitive;
@@ -96,57 +66,5 @@ extern const NSInteger MTLTestModelNameMissing;
 @property (readonly, nonatomic, assign) id assignProperty;
 @property (readonly, nonatomic, weak) id weakProperty;
 @property (readonly, nonatomic, strong) id strongProperty;
-
-//@property (readonly, nonatomic) id notIvarBacked;
-
-@end
-
-@interface MTLBoolModel : MTLModel <MTLJSONSerializing>
-
-@property (nonatomic, assign) BOOL flag;
-
-@end
-
-@interface MTLIDModel : MTLModel <MTLJSONSerializing>
-
-@property (nonatomic, strong) id anyObject;
-
-@end
-
-@interface MTLNonPropertyModel : MTLModel <MTLJSONSerializing>
-
-- (NSURL *)homepage;
-
-@end
-
-@interface MTLMultiKeypathModel : MTLModel <MTLJSONSerializing>
-
-// This property is associated with the "location" and "length" keys in JSON.
-@property (readonly, nonatomic, assign) NSRange range;
-
-// This property is associated with the "nested.location" and "nested.length"
-// keys in JSON.
-@property (readonly, nonatomic, assign) NSRange nestedRange;
-
-@end
-
-@interface MTLClassClusterModel : MTLModel <MTLJSONSerializing>
-
-@property (readonly, nonatomic, copy) NSString *flavor;
-
-@end
-
-@interface MTLChocolateClassClusterModel : MTLClassClusterModel
-
-// Associated with the "chocolate_bitterness" JSON key and transformed to a
-// string.
-@property (readwrite, nonatomic, assign) NSUInteger bitterness;
-
-@end
-
-@interface MTLStrawberryClassClusterModel : MTLClassClusterModel
-
-// Associated with the "strawberry_freshness" JSON key.
-@property (readwrite, nonatomic, assign) NSUInteger freshness;
 
 @end

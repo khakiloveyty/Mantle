@@ -8,7 +8,24 @@
 
 @import Foundation;
 
-#import "MTLTransformerErrorHandling.h"
+// The domain for errors originating from the MTLTransformerErrorHandling
+// protocol.
+//
+// Transformers conforming to this protocol are expected to use this error
+// domain if the transformation fails.
+extern NSString *const MTLTransformerErrorHandlingErrorDomain;
+
+// Used to indicate that the input value was illegal.
+//
+// Transformers conforming to this protocol are expected to use this error code
+// if the transformation fails due to an invalid input value.
+extern const NSInteger MTLTransformerErrorHandlingErrorInvalidInput;
+
+// Associated with the invalid input value.
+//
+// Transformers conforming to this protocol are expected to associate this key
+// with the invalid input in the userInfo dictionary.
+extern NSString *const MTLTransformerErrorHandlingInputValueErrorKey;
 
 // A block that represents a transformation.
 //
@@ -22,6 +39,56 @@
 //
 // Returns the result of the transformation, which may be nil.
 typedef id (^MTLValueTransformerBlock)(id value, BOOL *success, NSError **error);
+
+// This protocol can be implemented by NSValueTransformer subclasses to
+// communicate errors that occur during transformation.
+@protocol MTLTransformerErrorHandling <NSObject>
+@required
+
+// Transforms a value, returning any error that occurred during transformation.
+//
+// value   - The value to transform.
+// success - If not NULL, this will be set to a boolean indicating whether the
+//           transformation was successful.
+// error   - If not NULL, this may be set to an error that occurs during
+//           transforming the value.
+//
+// Returns the result of the transformation which may be nil. Clients should
+// inspect the success parameter to decide how to proceed with the result.
+- (id)transformedValue:(id)value success:(BOOL *)success error:(NSError **)error;
+
+@optional
+
+// Reverse-transforms a value, returning any error that occurred during
+// transformation.
+//
+// Transformers conforming to this protocol are expected to implemented this
+// method if they support reverse transformation.
+//
+// value   - The value to transform.
+// success - If not NULL, this will be set to a boolean indicating whether the
+//           transformation was successful.
+// error   - If not NULL, this may be set to an error that occurs during
+//           transforming the value.
+//
+// Returns the result of the reverse transformation which may be nil. Clients
+// should inspect the success parameter to decide how to proceed with the
+// result.
+- (id)reverseTransformedValue:(id)value success:(BOOL *)success error:(NSError **)error;
+
+@end
+
+@interface NSValueTransformer (MTLValueTransformer)
+
+// Flips the direction of the receiver's transformation, such that
+// -transformedValue: will become -reverseTransformedValue:, and vice-versa.
+//
+// The receiver must allow reverse transformation.
+//
+// Returns an inverted transformer.
+- (NSValueTransformer *)mtl_invertedTransformer;
+
+@end
 
 //
 // A value transformer supporting block-based transformation.
@@ -38,15 +105,5 @@ typedef id (^MTLValueTransformerBlock)(id value, BOOL *success, NSError **error)
 
 // Returns a transformer which transforms values using the given blocks.
 + (instancetype)transformerUsingForwardBlock:(MTLValueTransformerBlock)forwardTransformation reverseBlock:(MTLValueTransformerBlock)reverseTransformation;
-
-@end
-
-@interface MTLValueTransformer (Deprecated)
-
-+ (NSValueTransformer *)transformerWithBlock:(id (^)(id))transformationBlock __attribute__((deprecated("Replaced by +transformerUsingForwardBlock:")));
-
-+ (NSValueTransformer *)reversibleTransformerWithBlock:(id (^)(id))transformationBlock __attribute__((deprecated("Replaced by +transformerUsingReversibleBlock:")));
-
-+ (NSValueTransformer *)reversibleTransformerWithForwardBlock:(id (^)(id))forwardBlock reverseBlock:(id (^)(id))reverseBlock __attribute__((deprecated("Replaced by +transformerUsingForwardBlock:reverseBlock:")));
 
 @end

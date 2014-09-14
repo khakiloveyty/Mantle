@@ -6,6 +6,7 @@
 //  Copyright (c) 2012 GitHub. All rights reserved.
 //
 
+@import Foundation;
 @import XCTest;
 @import Mantle;
 
@@ -44,13 +45,11 @@
 
 - (void)testReversibleTwoWayTransformer
 {
-	MTLValueTransformer *transformer = [MTLValueTransformer
-		transformerUsingForwardBlock:^(NSString *str, BOOL *__unused success, __unused NSError **error) {
-			return [str stringByAppendingString:@"bar"];
-		}
-		reverseBlock:^(NSString *str, BOOL *__unused success, __unused NSError **error) {
-			return [str substringToIndex:str.length - 3];
-		}];
+	MTLValueTransformer *transformer = [MTLValueTransformer transformerUsingForwardBlock:^(NSString *str, BOOL *__unused success, __unused NSError **error) {
+        return [str stringByAppendingString:@"bar"];
+    } reverseBlock:^(NSString *str, BOOL *__unused success, __unused NSError **error) {
+        return [str substringToIndex:str.length - 3];
+    }];
 
 	XCTAssertNotNil(transformer);
 	XCTAssertTrue([transformer.class allowsReverseTransformation]);
