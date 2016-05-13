@@ -7,8 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "MTLDefines.h"
 
-@interface NSDictionary (MTLManipulationAdditions)
+NS_ASSUME_NONNULL_BEGIN
+
+@interface NSDictionary<KeyType, ObjectType> (MTLManipulationAdditions)
 
 /// Merges the keys and values from the given dictionary into the receiver. If
 /// both the receiver and `dictionary` have a given key, the value from
@@ -16,16 +19,18 @@
 ///
 /// Returns a new dictionary containing the entries of the receiver combined with
 /// those of `dictionary`.
-- (NSDictionary *)mtl_dictionaryByAddingEntriesFromDictionary:(NSDictionary *)dictionary;
+- (NSDictionary<KeyType, ObjectType> *)mtl_dictionaryByAddingEntriesFromDictionary:(nullable NSDictionary<KeyType, ObjectType> *)dictionary NS_SWIFT_UNAVAILABLE("Use Dictionary.appendingPairs(_:)");
 
 /// Creates a new dictionary with all the entries for the given keys removed from
 /// the receiver.
-- (NSDictionary *)mtl_dictionaryByRemovingValuesForKeys:(NSArray *)keys;
+- (NSDictionary<KeyType, ObjectType> *)mtl_dictionaryByRemovingValuesForKeys:(nullable NSArray<KeyType> *)keys NS_SWIFT_UNAVAILABLE("Use Dictionary.removingKeys(_:)");
 
 @end
 
-@interface NSDictionary (MTLManipulationAdditions_Deprecated)
+@interface NSDictionary<KeyType, ObjectType> (MTLManipulationAdditions_Deprecated)
 
-- (NSDictionary *)mtl_dictionaryByRemovingEntriesWithKeys:(NSSet *)keys __attribute__((deprecated("Replaced by -mtl_dictionaryByRemovingValuesForKeys:")));
+- (NSDictionary<KeyType, ObjectType> *)mtl_dictionaryByRemovingEntriesWithKeys:(NSSet<KeyType> *)keys MANTLE_DEPRECATED("Replaced by -mtl_dictionaryByRemovingValuesForKeys:");
 
 @end
+
+NS_ASSUME_NONNULL_END

@@ -7,11 +7,10 @@
 //
 
 #import "NSError+MTLModelException.h"
+@import ObjectiveC;
 #import "MTLModel.h"
-#import <Mantle/EXTRuntimeExtensions.h>
-#import <Mantle/EXTScope.h>
 #import "MTLReflection.h"
-#import <objc/runtime.h>
+#import "NSKeyValueCoding+MTLValidationAdditions.h"
 
 // Used to cache the reflection performed in +propertyKeys.
 static void *MTLModelCachedPropertyKeysKey = &MTLModelCachedPropertyKeysKey;
@@ -23,50 +22,6 @@ static void *MTLModelCachedTransitoryPropertyKeysKey = &MTLModelCachedTransitory
 // Associated in +generateAndCachePropertyKeys with a set of all permanent
 // property keys.
 static void *MTLModelCachedPermanentPropertyKeysKey = &MTLModelCachedPermanentPropertyKeysKey;
-
-// Validates a value for an object and sets it if necessary.
-//
-// obj         - The object for which the value is being validated. This value
-//               must not be nil.
-// key         - The name of one of `obj`s properties. This value must not be
-//               nil.
-// value       - The new value for the property identified by `key`.
-// forceUpdate - If set to `YES`, the value is being updated even if validating
-//               it did not change it.
-// error       - If not NULL, this may be set to any error that occurs during
-//               validation
-//
-// Returns YES if `value` could be validated and set, or NO if an error
-// occurred.
-static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUpdate, NSError **error) {
-	// Mark this as being autoreleased, because validateValue may return
-	// a new object to be stored in this variable (and we don't want ARC to
-	// double-free or leak the old or new values).
-	__autoreleasing id validatedValue = value;
-
-	@try {
-		if (![obj validateValue:&validatedValue forKey:key error:error]) return NO;
-
-		if (forceUpdate || value != validatedValue) {
-			[obj setValue:validatedValue forKey:key];
-		}
-
-		return YES;
-	} @catch (NSException *ex) {
-		NSLog(@"*** Caught exception setting key \"%@\" : %@", key, ex);
-
-		// Fail fast in Debug builds.
-		#if DEBUG
-		@throw ex;
-		#else
-		if (error != NULL) {
-			*error = [NSError mtl_modelErrorWithException:ex];
-		}
-
-		return NO;
-		#endif
-	}
-}
 
 @interface MTLModel ()
 
@@ -90,6 +45,10 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 + (void)enumeratePropertiesUsingBlock:(void (^)(objc_property_t property, BOOL *stop))block;
 
 @end
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wprotocol"
+// See MTLModel+NSCoding.
 
 @implementation MTLModel
 
@@ -137,7 +96,7 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 		// Mark this as being autoreleased, because validateValue may return
 		// a new object to be stored in this variable (and we don't want ARC to
 		// double-free or leak the old or new values).
-		__autoreleasing id value = [dictionary objectForKey:key];
+		__autoreleasing id value = dictionary[key];
 
 		if ([value isEqual:NSNull.null]) value = nil;
 
@@ -161,14 +120,12 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 		cls = cls.superclass;
 		if (properties == NULL) continue;
 
-		@onExit {
-			free(properties);
-		};
-
 		for (unsigned i = 0; i < count; i++) {
 			block(properties[i], &stop);
 			if (stop) break;
 		}
+
+		free(properties);
 	}
 }
 
@@ -222,20 +179,12 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 }
 
 + (MTLPropertyStorage)storageBehaviorForPropertyWithKey:(NSString *)propertyKey {
-	objc_property_t property = class_getProperty(self.class, propertyKey.UTF8String);
+	mtl_property_attr_t attributes = MTLAttributesForProperty(self.class, propertyKey);
+	if (attributes == 0) { return MTLPropertyStorageNone; }
 
-	if (property == NULL) return MTLPropertyStorageNone;
-
-	mtl_propertyAttributes *attributes = mtl_copyPropertyAttributes(property);
-	@onExit {
-		free(attributes);
-	};
-	
-	BOOL hasGetter = [self instancesRespondToSelector:attributes->getter];
-	BOOL hasSetter = [self instancesRespondToSelector:attributes->setter];
-	if (!attributes->dynamic && attributes->ivar == NULL && !hasGetter && !hasSetter) {
+	if (MTLPropertyIsRuntime(attributes)) {
 		return MTLPropertyStorageNone;
-	} else if (attributes->readonly && attributes->ivar == NULL) {
+	} else if (MTLPropertyIsComputed(attributes)) {
 		if ([self isEqual:MTLModel.class]) {
 			return MTLPropertyStorageNone;
 		} else {
@@ -253,7 +202,7 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 - (void)mergeValueForKey:(NSString *)key fromModel:(NSObject<MTLModel> *)model {
 	NSParameterAssert(key != nil);
 
-	SEL selector = MTLSelectorWithCapitalizedKeyPattern("merge", key, "FromModel:");
+	SEL selector = MTLSelectorWithKeyPattern("merge", key, "FromModel:");
 	if (![self respondsToSelector:selector]) {
 		if (model != nil) {
 			[self setValue:[model valueForKey:key] forKey:key];
@@ -262,9 +211,8 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 		return;
 	}
 
-	IMP imp = [self methodForSelector:selector];
-	void (*function)(id, SEL, id<MTLModel>) = (__typeof__(function))imp;
-	function(self, selector, model);
+	void (*mergeMsg)(id, SEL, id<MTLModel>) = (__typeof__(mergeMsg))objc_msgSend;
+	mergeMsg(self, selector, model);
 }
 
 - (void)mergeValuesForKeysFromModel:(id<MTLModel>)model {
@@ -332,3 +280,4 @@ static BOOL MTLValidateAndSetValue(id obj, NSString *key, id value, BOOL forceUp
 }
 
 @end
+#pragma clang diagnostic pop

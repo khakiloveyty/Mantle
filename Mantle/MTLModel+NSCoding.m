@@ -7,29 +7,14 @@
 //
 
 #import "MTLModel+NSCoding.h"
-#import <Mantle/EXTRuntimeExtensions.h>
-#import <Mantle/EXTScope.h>
 #import "MTLReflection.h"
+@import ObjectiveC;
 
 // Used in archives to store the modelVersion of the archived instance.
 static NSString * const MTLModelVersionKey = @"MTLModelVersion";
 
 // Used to cache the reflection performed in +allowedSecureCodingClassesByPropertyKey.
 static void *MTLModelCachedAllowedClassesKey = &MTLModelCachedAllowedClassesKey;
-
-// Returns whether the given NSCoder requires secure coding.
-static BOOL coderRequiresSecureCoding(NSCoder *coder) {
-	SEL requiresSecureCodingSelector = @selector(requiresSecureCoding);
-
-	// Only invoke the method if it's implemented (i.e., only on OS X 10.8+ and
-	// iOS 6+).
-	if (![coder respondsToSelector:requiresSecureCodingSelector]) return NO;
-
-	BOOL (*requiresSecureCodingIMP)(NSCoder *, SEL) = (__typeof__(requiresSecureCodingIMP))[coder methodForSelector:requiresSecureCodingSelector];
-	if (requiresSecureCodingIMP == NULL) return NO;
-
-	return requiresSecureCodingIMP(coder, requiresSecureCodingSelector);
-}
 
 // Returns all of the given class' encodable property keys (those that will not
 // be excluded from archives).
@@ -52,6 +37,8 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 	}
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 @implementation MTLModel (NSCoding)
 
 #pragma mark Versioning
@@ -67,15 +54,7 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 	NSMutableDictionary *behaviors = [[NSMutableDictionary alloc] initWithCapacity:propertyKeys.count];
 
 	for (NSString *key in propertyKeys) {
-		objc_property_t property = class_getProperty(self, key.UTF8String);
-		NSAssert(property != NULL, @"Could not find property \"%@\" on %@", key, self);
-
-		mtl_propertyAttributes *attributes = mtl_copyPropertyAttributes(property);
-		@onExit {
-			free(attributes);
-		};
-
-		MTLModelEncodingBehavior behavior = (attributes->weak ? MTLModelEncodingBehaviorConditional : MTLModelEncodingBehaviorUnconditional);
+		MTLModelEncodingBehavior behavior = MTLPropertyIsWeak(self, key) ? MTLModelEncodingBehaviorConditional : MTLModelEncodingBehaviorUnconditional;
 		behaviors[key] = @(behavior);
 	}
 
@@ -94,24 +73,17 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 	NSMutableDictionary *allowedClasses = [[NSMutableDictionary alloc] initWithCapacity:propertyKeys.count];
 
 	for (NSString *key in propertyKeys) {
-		objc_property_t property = class_getProperty(self, key.UTF8String);
-		NSAssert(property != NULL, @"Could not find property \"%@\" on %@", key, self);
-
-		mtl_propertyAttributes *attributes = mtl_copyPropertyAttributes(property);
-		@onExit {
-			free(attributes);
-		};
-
-		// If the property is not of object or class type, assume that it's
-		// a primitive which would be boxed into an NSValue.
-		if (attributes->type[0] != '@' && attributes->type[0] != '#') {
-			allowedClasses[key] = @[ NSValue.class ];
-			continue;
-		}
+		Class objectClass = Nil;
+		NSString *propertyType = MTLTypeEncodingForProperty(self, key, &objectClass);
+		uint8_t firstCodepoint;
 
 		// Omit this property from the dictionary if its class isn't known.
-		if (attributes->objectClass != nil) {
-			allowedClasses[key] = @[ attributes->objectClass ];
+		if (objectClass != Nil) {
+			allowedClasses[key] = @[ objectClass ];
+		} else if ([propertyType getBytes:&firstCodepoint maxLength:1 usedLength:NULL encoding:NSUTF8StringEncoding options:0 range:NSMakeRange(0, propertyType.length) remainingRange:NULL] && firstCodepoint != _C_ID && firstCodepoint != _C_CLASS) {
+			// If the property is not of object or class type, assume that it's
+			// a primitive which would be boxed into an NSValue.
+			allowedClasses[key] = @[ NSValue.class ];
 		}
 	}
 
@@ -126,17 +98,14 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 	NSParameterAssert(key != nil);
 	NSParameterAssert(coder != nil);
 
-	SEL selector = MTLSelectorWithCapitalizedKeyPattern("decode", key, "WithCoder:modelVersion:");
+	SEL selector = MTLSelectorWithKeyPattern("decode", key, "WithCoder:modelVersion:");
 	if ([self respondsToSelector:selector]) {
-		IMP imp = [self methodForSelector:selector];
-		id (*function)(id, SEL, NSCoder *, NSUInteger) = (__typeof__(function))imp;
-		id result = function(self, selector, coder, modelVersion);
-		
-		return result;
+		id (*decodeMsg)(id, SEL, NSCoder *, NSUInteger) = (__typeof__(decodeMsg))objc_msgSend;
+		return decodeMsg(self, selector, coder, modelVersion);
 	}
 
 	@try {
-		if (coderRequiresSecureCoding(coder)) {
+		if (coder.requiresSecureCoding) {
 			NSArray *allowedClasses = self.class.allowedSecureCodingClassesByPropertyKey[key];
 			NSAssert(allowedClasses != nil, @"No allowed classes specified for securely decoding key \"%@\" on %@", key, self.class);
 			
@@ -153,14 +122,7 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 #pragma mark NSCoding
 
 - (instancetype)initWithCoder:(NSCoder *)coder {
-	BOOL requiresSecureCoding = coderRequiresSecureCoding(coder);
-	NSNumber *version = nil;
-	if (requiresSecureCoding) {
-		version = [coder decodeObjectOfClass:NSNumber.class forKey:MTLModelVersionKey];
-	} else {
-		version = [coder decodeObjectForKey:MTLModelVersionKey];
-	}
-	
+	NSNumber *version = [coder decodeObjectOfClass:NSNumber.class forKey:MTLModelVersionKey];
 	if (version == nil) {
 		NSLog(@"Warning: decoding an archive of %@ without a version, assuming 0", self.class);
 	} else if (version.unsignedIntegerValue > self.class.modelVersion) {
@@ -168,7 +130,7 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 		return nil;
 	}
 
-	if (requiresSecureCoding) {
+	if (coder.requiresSecureCoding) {
 		verifyAllowedClassesByPropertyKey(self.class);
 	} else {
 		// Handle the old archive format.
@@ -205,7 +167,9 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder {
-	if (coderRequiresSecureCoding(coder)) verifyAllowedClassesByPropertyKey(self.class);
+	if (coder.requiresSecureCoding) {
+		verifyAllowedClassesByPropertyKey(self.class);
+	}
 
 	[coder encodeObject:@(self.class.modelVersion) forKey:MTLModelVersionKey];
 
@@ -251,6 +215,7 @@ static void verifyAllowedClassesByPropertyKey(Class modelClass) {
 }
 
 @end
+#pragma clang diagnostic pop
 
 @implementation MTLModel (OldArchiveSupport)
 

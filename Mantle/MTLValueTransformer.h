@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-
+#import "MTLDefines.h"
 #import "MTLTransformerErrorHandling.h"
 
 /// A block that represents a transformation.
@@ -21,32 +21,37 @@
 ///           transforming the value.
 ///
 /// Returns the result of the transformation, which may be nil.
-typedef id (^MTLValueTransformerBlock)(id value, BOOL *success, NSError **error);
+typedef id _Nullable MANTLE_DEPRECATED("Unsafe for generics") (^MTLValueTransformerBlock)(_Nullable __kindof id value, BOOL *_Nonnull success, NSError *_Nullable *_Nullable error);
+
+NS_ASSUME_NONNULL_BEGIN
 
 ///
 /// A value transformer supporting block-based transformation.
 ///
-@interface MTLValueTransformer : NSValueTransformer <MTLTransformerErrorHandling>
+NS_REFINED_FOR_SWIFT
+@interface MTLValueTransformer<__covariant InType, OutType>: NSValueTransformer <MTLTransformerErrorHandling>
 
 /// Returns a transformer which transforms values using the given block. Reverse
 /// transformations will not be allowed.
-+ (instancetype)transformerUsingForwardBlock:(MTLValueTransformerBlock)transformation;
++ (MTLValueTransformer<InType, OutType> *)transformerUsingForwardBlock:(OutType _Nullable (^)(_Nullable __kindof InType value, BOOL *_Nonnull success, NSError *_Nullable *_Nullable error))transformation;
 
 /// Returns a transformer which transforms values using the given block, for
 /// forward or reverse transformations.
-+ (instancetype)transformerUsingReversibleBlock:(MTLValueTransformerBlock)transformation;
++ (MTLValueTransformer<InType, InType> *)transformerUsingReversibleBlock:(InType _Nullable (^)(_Nullable __kindof InType value, BOOL *_Nonnull success, NSError *_Nullable *_Nullable error))transformation;
 
 /// Returns a transformer which transforms values using the given blocks.
-+ (instancetype)transformerUsingForwardBlock:(MTLValueTransformerBlock)forwardTransformation reverseBlock:(MTLValueTransformerBlock)reverseTransformation;
++ (MTLValueTransformer<InType, OutType> *)transformerUsingForwardBlock:(OutType _Nullable (^)(_Nullable __kindof InType value, BOOL *_Nonnull success, NSError *_Nullable *_Nullable error))forwardTransformation reverseBlock:(InType _Nullable (^)(_Nullable __kindof InType value, BOOL *_Nonnull success, NSError *_Nullable *_Nullable error))reverseTransformation;
 
 @end
 
 @interface MTLValueTransformer (Deprecated)
 
-+ (NSValueTransformer *)transformerWithBlock:(id (^)(id))transformationBlock __attribute__((deprecated("Replaced by +transformerUsingForwardBlock:")));
++ (NSValueTransformer *)transformerWithBlock:(id (^)(id))transformationBlock MANTLE_DEPRECATED("Replaced by +transformerUsingForwardBlock:");
 
-+ (NSValueTransformer *)reversibleTransformerWithBlock:(id (^)(id))transformationBlock __attribute__((deprecated("Replaced by +transformerUsingReversibleBlock:")));
++ (NSValueTransformer *)reversibleTransformerWithBlock:(id (^)(id))transformationBlock MANTLE_DEPRECATED("Replaced by +transformerUsingReversibleBlock:");
 
-+ (NSValueTransformer *)reversibleTransformerWithForwardBlock:(id (^)(id))forwardBlock reverseBlock:(id (^)(id))reverseBlock __attribute__((deprecated("Replaced by +transformerUsingForwardBlock:reverseBlock:")));
++ (NSValueTransformer *)reversibleTransformerWithForwardBlock:(id (^)(id))forwardBlock reverseBlock:(id (^)(id))reverseBlock MANTLE_DEPRECATED("Replaced by +transformerUsingForwardBlock:reverseBlock:");
 
 @end
+
+NS_ASSUME_NONNULL_END

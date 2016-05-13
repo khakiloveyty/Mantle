@@ -12,18 +12,6 @@
 
 QuickSpecBegin(MTLArrayManipulationAdditions)
 
-describe(@"-mtl_firstObject", ^{
-	it(@"should return the first object", ^{
-		NSArray *array = @[ @1, @2, @3 ];
-		expect(array.mtl_firstObject).to(equal(@1));
-	});
-
-	it(@"should return nil for an empty array", ^{
-		NSArray *array = @[];
-		expect(array.mtl_firstObject).to(beNil());
-	});
-});
-
 describe(@"-mtl_arrayByRemovingObject:", ^{
 	it(@"should return a new array without the object", ^{
 		NSArray *array = @[ @1, @2, @3 ];

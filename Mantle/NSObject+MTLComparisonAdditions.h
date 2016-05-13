@@ -10,6 +10,11 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "MTLDefines.h"
+
+NS_ASSUME_NONNULL_BEGIN
 
 /// Returns whether both objects are identical or equal via -isEqual:
-BOOL MTLEqualObjects(id obj1, id obj2);
+extern BOOL MTLEqualObjects(_Nullable id obj1, _Nullable id obj2) NS_SWIFT_UNAVAILABLE("Use ==");
+
+NS_ASSUME_NONNULL_END

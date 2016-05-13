@@ -194,7 +194,7 @@ describe(@"value mapping transformer", ^{
 });
 
 describe(@"date format transformer", ^{
-	__block NSValueTransformer<MTLTransformerErrorHandling> *transformer;
+	__block NSValueTransformer *transformer;
 
 	beforeEach(^{
 		transformer = [NSValueTransformer mtl_dateTransformerWithDateFormat:@"MMMM d, yyyy" calendar:[NSCalendar calendarWithIdentifier:NSCalendarIdentifierGregorian] locale:[NSLocale localeWithLocaleIdentifier:@"en_US"] timeZone:[NSTimeZone timeZoneWithName:@"America/Los_Angeles"] defaultDate:nil];
@@ -234,7 +234,7 @@ describe(@"date format transformer", ^{
 });
 
 describe(@"number format transformer", ^{
-	__block NSValueTransformer<MTLTransformerErrorHandling> *transformer;
+	__block NSValueTransformer *transformer;
 
 	beforeEach(^{
 		transformer = [NSValueTransformer mtl_numberTransformerWithNumberStyle:NSNumberFormatterDecimalStyle locale:[NSLocale localeWithLocaleIdentifier:@"en_US"]];

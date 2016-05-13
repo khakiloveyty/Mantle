@@ -6,7 +6,9 @@
 //  Copyright (c) 2013 GitHub. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+#import "MTLValueTransformer.h"
+
+NS_ASSUME_NONNULL_BEGIN
 
 @interface NSValueTransformer (MTLInversionAdditions)
 
@@ -16,6 +18,8 @@
 /// The receiver must allow reverse transformation.
 ///
 /// Returns an inverted transformer.
-- (NSValueTransformer *)mtl_invertedTransformer;
+- (NSValueTransformer *)mtl_invertedTransformer NS_SWIFT_UNAVAILABLE("Use MTLReversibleValueTransformer.inverted()");
 
 @end
+
+NS_ASSUME_NONNULL_END

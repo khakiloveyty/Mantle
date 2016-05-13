@@ -8,21 +8,21 @@
 
 #import <Foundation/Foundation.h>
 
-@interface NSArray (MTLManipulationAdditions)
+NS_ASSUME_NONNULL_BEGIN
 
-/// The first object in the array or nil if the array is empty.
-/// Forwards to `firstObject` which has been first declared in iOS7, but works with iOS4/10.6.
-@property (nonatomic, readonly, strong) id mtl_firstObject;
+@interface NSArray<ObjectType> (MTLManipulationAdditions)
 
 /// Returns a new array without all instances of the given object.
-- (NSArray *)mtl_arrayByRemovingObject:(id)object;
+- (NSArray<ObjectType> *)mtl_arrayByRemovingObject:(ObjectType)object NS_SWIFT_UNAVAILABLE("Use methods on Array");
 
 /// Returns a new array without the first object. If the array is empty, it
 /// returns the empty array.
-- (NSArray *)mtl_arrayByRemovingFirstObject;
+- (NSArray<ObjectType> *)mtl_arrayByRemovingFirstObject NS_SWIFT_UNAVAILABLE("Use Array.dropFirst()");
 
 /// Returns a new array without the last object. If the array is empty, it
 /// returns the empty array.
-- (NSArray *)mtl_arrayByRemovingLastObject;
+- (NSArray<ObjectType> *)mtl_arrayByRemovingLastObject NS_SWIFT_UNAVAILABLE("Use Array.dropLast()");
 
 @end
+
+NS_ASSUME_NONNULL_END

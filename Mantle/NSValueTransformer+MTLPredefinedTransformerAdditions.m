@@ -103,7 +103,7 @@ NSString * const MTLBooleanValueTransformerName = @"MTLBooleanValueTransformerNa
 
 #pragma mark Customizable Transformers
 
-+ (NSValueTransformer<MTLTransformerErrorHandling> *)mtl_arrayMappingTransformerWithTransformer:(NSValueTransformer *)transformer {
++ (NSValueTransformer *)mtl_arrayMappingTransformerWithTransformer:(NSValueTransformer *)transformer {
 	NSParameterAssert(transformer != nil);
 	
 	id (^forwardBlock)(NSArray *values, BOOL *success, NSError **error) = ^ id (NSArray *values, BOOL *success, NSError **error) {
@@ -228,7 +228,7 @@ NSString * const MTLBooleanValueTransformerName = @"MTLBooleanValueTransformerNa
 	}
 }
 
-+ (NSValueTransformer<MTLTransformerErrorHandling> *)mtl_validatingTransformerForClass:(Class)modelClass {
++ (NSValueTransformer *)mtl_validatingTransformerForClass:(Class)modelClass {
 	NSParameterAssert(modelClass != nil);
 
 	return [MTLValueTransformer transformerUsingForwardBlock:^ id (id value, BOOL *success, NSError **error) {
@@ -275,7 +275,7 @@ NSString * const MTLBooleanValueTransformerName = @"MTLBooleanValueTransformerNa
 	return [self mtl_valueMappingTransformerWithDictionary:dictionary defaultValue:nil reverseDefaultValue:nil];
 }
 
-+ (NSValueTransformer<MTLTransformerErrorHandling> *)mtl_dateTransformerWithDateFormat:(NSString *)dateFormat calendar:(NSCalendar *)calendar locale:(NSLocale *)locale timeZone:(NSTimeZone *)timeZone defaultDate:(NSDate *)defaultDate {
++ (NSValueTransformer *)mtl_dateTransformerWithDateFormat:(NSString *)dateFormat calendar:(NSCalendar *)calendar locale:(NSLocale *)locale timeZone:(NSTimeZone *)timeZone defaultDate:(NSDate *)defaultDate {
 	NSParameterAssert(dateFormat.length);
 
 	NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
@@ -289,11 +289,11 @@ NSString * const MTLBooleanValueTransformerName = @"MTLBooleanValueTransformerNa
 }
 
 
-+ (NSValueTransformer<MTLTransformerErrorHandling> *)mtl_dateTransformerWithDateFormat:(NSString *)dateFormat locale:(NSLocale *)locale {
++ (NSValueTransformer *)mtl_dateTransformerWithDateFormat:(NSString *)dateFormat locale:(NSLocale *)locale {
 	return [self mtl_dateTransformerWithDateFormat:dateFormat calendar:nil locale:locale timeZone:nil defaultDate:nil];
 }
 
-+ (NSValueTransformer<MTLTransformerErrorHandling> *)mtl_numberTransformerWithNumberStyle:(NSNumberFormatterStyle)numberStyle locale:(NSLocale *)locale {
++ (NSValueTransformer *)mtl_numberTransformerWithNumberStyle:(NSNumberFormatterStyle)numberStyle locale:(NSLocale *)locale {
 	NSNumberFormatter *numberFormatter = [[NSNumberFormatter alloc] init];
 	numberFormatter.numberStyle = numberStyle;
 	numberFormatter.locale = locale;
@@ -301,7 +301,7 @@ NSString * const MTLBooleanValueTransformerName = @"MTLBooleanValueTransformerNa
 	return [self mtl_transformerWithFormatter:numberFormatter forObjectClass:NSNumber.class];
 }
 
-+ (NSValueTransformer<MTLTransformerErrorHandling> *)mtl_transformerWithFormatter:(NSFormatter *)formatter forObjectClass:(Class)objectClass {
++ (NSValueTransformer *)mtl_transformerWithFormatter:(NSFormatter *)formatter forObjectClass:(Class)objectClass {
 	NSParameterAssert(formatter != nil);
 	NSParameterAssert(objectClass != nil);
 	return [MTLValueTransformer
@@ -380,11 +380,11 @@ NSString * const MTLBooleanValueTransformerName = @"MTLBooleanValueTransformerNa
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-implementations"
 
-+ (NSValueTransformer<MTLTransformerErrorHandling> *)mtl_JSONDictionaryTransformerWithModelClass:(Class)modelClass {
++ (NSValueTransformer *)mtl_JSONDictionaryTransformerWithModelClass:(Class)modelClass {
 	return [MTLJSONAdapter dictionaryTransformerWithModelClass:modelClass];
 }
 
-+ (NSValueTransformer<MTLTransformerErrorHandling> *)mtl_JSONArrayTransformerWithModelClass:(Class)modelClass {
++ (NSValueTransformer *)mtl_JSONArrayTransformerWithModelClass:(Class)modelClass {
 	return [MTLJSONAdapter arrayTransformerWithModelClass:modelClass];
 }
 

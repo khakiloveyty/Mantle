@@ -7,8 +7,10 @@
 //
 
 #import <Foundation/Foundation.h>
-
+#import "MTLDefines.h"
 #import "MTLTransformerErrorHandling.h"
+
+NS_ASSUME_NONNULL_BEGIN
 
 /// The name for a value transformer that converts strings into URLs and back.
 extern NSString * const MTLURLValueTransformerName;
@@ -33,7 +35,7 @@ extern NSString * const MTLBooleanValueTransformerName;
 ///
 /// Returns a transformer which applies a transformation to each element of an
 /// array.
-+ (NSValueTransformer<MTLTransformerErrorHandling> *)mtl_arrayMappingTransformerWithTransformer:(NSValueTransformer *)transformer;
++ (NSValueTransformer *)mtl_arrayMappingTransformerWithTransformer:(NSValueTransformer *)transformer NS_SWIFT_UNAVAILABLE("Use MTLValueTransformer.init(mappingTransformer:)");
 
 /// A reversible value transformer to transform between the keys and objects of a
 /// dictionary.
@@ -56,12 +58,12 @@ extern NSString * const MTLBooleanValueTransformerName;
 ///
 /// Returns a transformer which will map from keys to objects for forward
 /// transformations, and from objects to keys for reverse transformations.
-+ (NSValueTransformer<MTLTransformerErrorHandling> *)mtl_valueMappingTransformerWithDictionary:(NSDictionary *)dictionary defaultValue:(id)defaultValue reverseDefaultValue:(id)reverseDefaultValue;
++ (NSValueTransformer *)mtl_valueMappingTransformerWithDictionary:(NSDictionary<NSString *, id> *)dictionary defaultValue:(nullable id)defaultValue reverseDefaultValue:(nullable id)reverseDefaultValue NS_SWIFT_UNAVAILABLE("Use MTLValueTransformer.init(valueMapping:defaultValue:reverseDefaultValue:)");
 
 /// Returns a value transformer created by calling
 /// `+mtl_valueMappingTransformerWithDictionary:defaultValue:reverseDefaultValue:`
 /// with a default value of `nil` and a reverse default value of `nil`.
-+ (NSValueTransformer<MTLTransformerErrorHandling> *)mtl_valueMappingTransformerWithDictionary:(NSDictionary *)dictionary;
++ (NSValueTransformer *)mtl_valueMappingTransformerWithDictionary:(NSDictionary<NSString *, id> *)dictionary NS_SWIFT_UNAVAILABLE("Use MTLValueTransformer.init(valueMapping:defaultValue:reverseDefaultValue:)");
 
 /// A reversible value transformer to transform between a date and its string
 /// representation
@@ -73,12 +75,12 @@ extern NSString * const MTLBooleanValueTransformerName;
 ///
 /// Returns a transformer which will map from strings to dates for forward
 /// transformations, and from dates to strings for reverse transformations.
-+ (NSValueTransformer<MTLTransformerErrorHandling> *)mtl_dateTransformerWithDateFormat:(NSString *)dateFormat calendar:(NSCalendar *)calendar locale:(NSLocale *)locale timeZone:(NSTimeZone *)timeZone defaultDate:(NSDate *)defaultDate;
++ (NSValueTransformer *)mtl_dateTransformerWithDateFormat:(NSString *)dateFormat calendar:(nullable NSCalendar *)calendar locale:(nullable NSLocale *)locale timeZone:(nullable NSTimeZone *)timeZone defaultDate:(nullable NSDate *)defaultDate NS_SWIFT_UNAVAILABLE("Use MTLValueTransformer.init(dateFormat:locale:calendar:timeZone:defaultDate:)");
 
 /// Returns a value transformer created by calling
 /// `+mtl_dateTransformerWithDateFormat:calendar:locale:timeZone:defaultDate:`
 /// with a calendar, locale, time zone and default date of `nil`.
-+ (NSValueTransformer<MTLTransformerErrorHandling> *)mtl_dateTransformerWithDateFormat:(NSString *)dateFormat locale:(NSLocale *)locale;
++ (NSValueTransformer *)mtl_dateTransformerWithDateFormat:(NSString *)dateFormat locale:(nullable NSLocale *)locale NS_SWIFT_UNAVAILABLE("Use MTLValueTransformer.init(dateFormat:locale:calendar:timeZone:defaultDate:)");
 
 /// A reversible value transformer to transform between a number and its string
 /// representation
@@ -87,7 +89,7 @@ extern NSString * const MTLBooleanValueTransformerName;
 ///
 /// Returns a transformer which will map from strings to numbers for forward
 /// transformations, and from numbers to strings for reverse transformations.
-+ (NSValueTransformer<MTLTransformerErrorHandling> *)mtl_numberTransformerWithNumberStyle:(NSNumberFormatterStyle)numberStyle locale:(NSLocale *)locale;
++ (NSValueTransformer *)mtl_numberTransformerWithNumberStyle:(NSNumberFormatterStyle)numberStyle locale:(nullable NSLocale *)locale NS_SWIFT_UNAVAILABLE("Use MTLValueTransformer.(numberStyle:locale:)");
 
 /// A reversible value transformer to transform between an object and its string
 /// representation
@@ -97,7 +99,7 @@ extern NSString * const MTLBooleanValueTransformerName;
 ///
 /// Returns a transformer which will map from strings to objects for forward
 /// transformations, and from objects to strings for reverse transformations.
-+ (NSValueTransformer<MTLTransformerErrorHandling> *)mtl_transformerWithFormatter:(NSFormatter *)formatter forObjectClass:(Class)objectClass;
++ (NSValueTransformer *)mtl_transformerWithFormatter:(NSFormatter *)formatter forObjectClass:(Class)objectClass NS_SWIFT_UNAVAILABLE("Use MTLValueTransformer.init(formatter:forType:configuration:)");
 
 /// A value transformer that errors if the transformed value are not of the given
 /// class.
@@ -106,10 +108,12 @@ extern NSString * const MTLBooleanValueTransformerName;
 ///
 /// Returns a transformer which will return an error if the transformed in value
 /// is not a member of class. Otherwise, the value is simply passed through.
-+ (NSValueTransformer<MTLTransformerErrorHandling> *)mtl_validatingTransformerForClass:(Class)modelClass;
++ (NSValueTransformer *)mtl_validatingTransformerForClass:(Class)modelClass NS_SWIFT_UNAVAILABLE("Use MTLValueTransformer");
 
-+ (NSValueTransformer<MTLTransformerErrorHandling> *)mtl_JSONDictionaryTransformerWithModelClass:(Class)modelClass __attribute__((deprecated("Replaced by +[MTLJSONAdapter dictionaryTransformerWithModelClass:]")));
++ (NSValueTransformer *)mtl_JSONDictionaryTransformerWithModelClass:(Class)modelClass MANTLE_DEPRECATED("Replaced by +[MTLJSONAdapter dictionaryTransformerWithModelClass:]");
 
-+ (NSValueTransformer<MTLTransformerErrorHandling> *)mtl_JSONArrayTransformerWithModelClass:(Class)modelClass __attribute__((deprecated("Replaced by +[MTLJSONAdapter arrayTransformerWithModelClass:]")));
++ (NSValueTransformer *)mtl_JSONArrayTransformerWithModelClass:(Class)modelClass MANTLE_DEPRECATED("Replaced by +[MTLJSONAdapter arrayTransformerWithModelClass:]");
 
 @end
+
+NS_ASSUME_NONNULL_END

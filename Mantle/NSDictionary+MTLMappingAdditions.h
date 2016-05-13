@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface NSDictionary (MTLMappingAdditions)
 
 /// Creates an identity mapping for serialization.
@@ -16,6 +18,8 @@
 ///
 /// Returns a dictionary that maps all properties of the given class to
 /// themselves.
-+ (NSDictionary *)mtl_identityPropertyMapWithModel:(Class)modelClass;
++ (NSDictionary<NSString *, NSString *> *)mtl_identityPropertyMapWithModel:(Class<MTLModel>)modelClass NS_SWIFT_UNAVAILABLE("Use MTLModelProtocol.Type.identityPropertyKeyPaths()");
 
 @end
+
+NS_ASSUME_NONNULL_END

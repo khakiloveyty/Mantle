@@ -17,29 +17,16 @@
 ///                                         if unconditionally encoded elsewhere.
 ///                                         This should only be used for object
 ///                                         properties.
-typedef enum : NSUInteger {
+typedef NS_ENUM(NSInteger, MTLModelEncodingBehavior) {
     MTLModelEncodingBehaviorExcluded = 0,
     MTLModelEncodingBehaviorUnconditional,
     MTLModelEncodingBehaviorConditional,
-} MTLModelEncodingBehavior;
+};
+
+NS_ASSUME_NONNULL_BEGIN
 
 /// Implements default archiving and unarchiving behaviors for MTLModel.
-@interface MTLModel (NSCoding) <NSCoding>
-
-/// Initializes the receiver from an archive.
-///
-/// This will decode the original +modelVersion of the archived object, then
-/// invoke -decodeValueForKey:withCoder:modelVersion: for each of the receiver's
-/// +propertyKeys.
-///
-/// Returns an initialized model object, or nil if a decoding error occurred.
-- (id)initWithCoder:(NSCoder *)coder;
-
-/// Archives the receiver using the given coder.
-///
-/// This will encode the receiver's +modelVersion, then the receiver's properties
-/// according to the behaviors specified in +encodingBehaviorsByPropertyKey.
-- (void)encodeWithCoder:(NSCoder *)coder;
+@interface MTLModel (NSCoding)
 
 /// Determines how the +propertyKeys of the class are encoded into an archive.
 /// The values of this dictionary should be boxed MTLModelEncodingBehavior
@@ -54,7 +41,7 @@ typedef enum : NSUInteger {
 /// behaviors. If a property is an object with `weak` semantics, the default
 /// behavior is MTLModelEncodingBehaviorConditional; otherwise, the default is
 /// MTLModelEncodingBehaviorUnconditional.
-+ (NSDictionary *)encodingBehaviorsByPropertyKey;
++ (NSDictionary<NSString *, NSNumber *> *)encodingBehaviorsByPropertyKey;
 
 /// Determines the classes that are allowed to be decoded for each of the
 /// receiver's properties when using <NSSecureCoding>. The values of this
@@ -73,7 +60,7 @@ typedef enum : NSUInteger {
 /// cannot be determined (e.g., it is declared as `id`), it will be omitted from
 /// the dictionary, and subclasses must provide a valid value to prevent an
 /// exception being thrown during encoding/decoding.
-+ (NSDictionary *)allowedSecureCodingClassesByPropertyKey;
++ (NSDictionary<NSString *, NSArray<Class<NSSecureCoding>> *> *)allowedSecureCodingClassesByPropertyKey;
 
 /// Decodes the value of the given property key from an archive.
 ///
@@ -96,7 +83,7 @@ typedef enum : NSUInteger {
 /// modelVersion - The version of the original model object that was encoded.
 ///
 /// Returns the decoded and boxed value, or nil if the key was not present.
-- (id)decodeValueForKey:(NSString *)key withCoder:(NSCoder *)coder modelVersion:(NSUInteger)modelVersion;
+- (nullable id)decodeValueForKey:(NSString *)key withCoder:(NSCoder *)coder modelVersion:(NSUInteger)modelVersion;
 
 /// The version of this MTLModel subclass.
 ///
@@ -123,6 +110,8 @@ typedef enum : NSUInteger {
 ///                          representation was encoded.
 ///
 /// Returns nil by default, indicating that conversion failed.
-+ (NSDictionary *)dictionaryValueFromArchivedExternalRepresentation:(NSDictionary *)externalRepresentation version:(NSUInteger)fromVersion;
++ (nullable NSDictionary<NSString *, id> *)dictionaryValueFromArchivedExternalRepresentation:(NSDictionary<NSString *, id> *)externalRepresentation version:(NSUInteger)fromVersion;
 
 @end
+
+NS_ASSUME_NONNULL_END

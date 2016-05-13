@@ -7,6 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "MTLDefines.h"
+
+NS_ASSUME_NONNULL_BEGIN
 
 @interface NSError (MTLModelException)
 
@@ -14,10 +17,13 @@
 /// MTLModel.
 ///
 /// exception - The exception that was thrown while updating the model.
-///             This argument must not be nil.
+/// description - Localized description for the error.
 ///
 /// Returns an error that takes its localized description and failure reason
-/// from the exception.
-+ (instancetype)mtl_modelErrorWithException:(NSException *)exception;
+/// from the exception. If a localized description is also included, the
+/// exception description is used as the recovery suggestion.
+- (instancetype)mtl_initWithModelException:(NSException *)exception localizedDescription:(nullable NSString *)description MANTLE_EXTENDED_INIT;
 
 @end
+
+NS_ASSUME_NONNULL_END

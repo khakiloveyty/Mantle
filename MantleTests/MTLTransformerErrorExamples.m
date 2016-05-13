@@ -22,7 +22,7 @@ QuickConfigurationBegin(MTLTransformerErrorExamplesConfiguration)
 
 + (void)configure:(Configuration *)configuration {
 	sharedExamples(MTLTransformerErrorExamples, ^(QCKDSLSharedExampleContext data) {
-		__block NSValueTransformer<MTLTransformerErrorHandling> *transformer;
+		__block NSValueTransformer *transformer;
 		__block id invalidTransformationInput;
 		__block id invalidReverseTransformationInput;
 

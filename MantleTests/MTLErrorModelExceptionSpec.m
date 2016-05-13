@@ -14,14 +14,23 @@
 
 QuickSpecBegin(MTLErrorModelException)
 
-describe(@"+mtl_modelErrorWithException:", ^{
-	it(@"should return a new error for that exception", ^{
-		NSException *exception = [NSException exceptionWithName:@"MTLTestException" reason:@"Just Testing" userInfo:nil];
+describe(@"-mtl_initWithModelException:localizedDescription:", ^{
+	NSException *exception = [NSException exceptionWithName:@"MTLTestException" reason:@"Just Testing" userInfo:nil];
 
-		NSError *error = [NSError mtl_modelErrorWithException:exception];
+	it(@"should return a new error for that exception", ^{
+		NSError *error = [[NSError alloc] mtl_initWithModelException:exception localizedDescription:nil];
 
 		expect(error).notTo(beNil());
 		expect(error.localizedDescription).to(equal(@"Just Testing"));
+		expect(error.localizedFailureReason).to(equal(@"Just Testing"));
+	});
+
+	it(@"should adopt the given description", ^{
+		NSError *error = [[NSError alloc] mtl_initWithModelException:exception localizedDescription:@"A test is being run."];
+
+		expect(error).notTo(beNil());
+		expect(error.localizedDescription).to(equal(@"A test is being run."));
+		expect(error.localizedRecoverySuggestion).to(equal(@"Just Testing"));
 		expect(error.localizedFailureReason).to(equal(@"Just Testing"));
 	});
 });

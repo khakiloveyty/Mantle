@@ -8,6 +8,19 @@
 
 #import "MTLValueTransformer.h"
 
+/// A block that represents a transformation.
+///
+/// value   - The value to transform.
+/// success - The block must set this parameter to indicate whether the
+///           transformation was successful.
+///           MTLValueTransformer will always call this block with *success
+///           initialized to YES.
+/// error   - If not NULL, this may be set to an error that occurs during
+///           transforming the value.
+///
+/// Returns the result of the transformation, which may be nil.
+typedef id _Nullable (^MTLAnyValueTransformerBlock)(_Nullable __kindof id value, BOOL *_Nonnull success, NSError *_Nullable *_Nullable error);
+
 //
 // Any MTLValueTransformer supporting reverse transformation. Necessary because
 // +allowsReverseTransformation is a class method.
@@ -17,8 +30,8 @@
 
 @interface MTLValueTransformer ()
 
-@property (nonatomic, copy, readonly) MTLValueTransformerBlock forwardBlock;
-@property (nonatomic, copy, readonly) MTLValueTransformerBlock reverseBlock;
+@property (nonatomic, copy, readonly) MTLAnyValueTransformerBlock forwardBlock;
+@property (nonatomic, copy, readonly) MTLAnyValueTransformerBlock reverseBlock;
 
 @end
 
@@ -26,19 +39,19 @@
 
 #pragma mark Lifecycle
 
-+ (instancetype)transformerUsingForwardBlock:(MTLValueTransformerBlock)forwardBlock {
++ (instancetype)transformerUsingForwardBlock:(MTLAnyValueTransformerBlock)forwardBlock {
 	return [[self alloc] initWithForwardBlock:forwardBlock reverseBlock:nil];
 }
 
-+ (instancetype)transformerUsingReversibleBlock:(MTLValueTransformerBlock)reversibleBlock {
++ (instancetype)transformerUsingReversibleBlock:(MTLAnyValueTransformerBlock)reversibleBlock {
 	return [self transformerUsingForwardBlock:reversibleBlock reverseBlock:reversibleBlock];
 }
 
-+ (instancetype)transformerUsingForwardBlock:(MTLValueTransformerBlock)forwardBlock reverseBlock:(MTLValueTransformerBlock)reverseBlock {
++ (instancetype)transformerUsingForwardBlock:(MTLAnyValueTransformerBlock)forwardBlock reverseBlock:(MTLAnyValueTransformerBlock)reverseBlock {
 	return [[MTLReversibleValueTransformer alloc] initWithForwardBlock:forwardBlock reverseBlock:reverseBlock];
 }
 
-- (id)initWithForwardBlock:(MTLValueTransformerBlock)forwardBlock reverseBlock:(MTLValueTransformerBlock)reverseBlock {
+- (instancetype)initWithForwardBlock:(MTLAnyValueTransformerBlock)forwardBlock reverseBlock:(MTLAnyValueTransformerBlock)reverseBlock {
 	NSParameterAssert(forwardBlock != nil);
 
 	self = [super init];
@@ -85,7 +98,7 @@
 
 #pragma mark Lifecycle
 
-- (id)initWithForwardBlock:(MTLValueTransformerBlock)forwardBlock reverseBlock:(MTLValueTransformerBlock)reverseBlock {
+- (id)initWithForwardBlock:(MTLAnyValueTransformerBlock)forwardBlock reverseBlock:(MTLAnyValueTransformerBlock)reverseBlock {
 	NSParameterAssert(reverseBlock != nil);
 	return [super initWithForwardBlock:forwardBlock reverseBlock:reverseBlock];
 }

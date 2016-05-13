@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 /// Defines a property's storage behavior, which affects how it will be copied,
 /// compared, and persisted.
 ///
@@ -20,11 +22,14 @@
 /// MTLPropertyStoragePermanent  - The property is included in serialization
 ///                                (like `NSCoding`) and equality, since it can
 ///                                be expected to stick around.
-typedef enum : NSUInteger {
+typedef NS_ENUM(NSInteger, MTLPropertyStorage) {
     MTLPropertyStorageNone,
     MTLPropertyStorageTransitory,
     MTLPropertyStoragePermanent,
-} MTLPropertyStorage;
+};
+
+/// Associated with an NSException that was caught.
+extern NSString * const MTLModelThrownExceptionErrorKey NS_REFINED_FOR_SWIFT;
 
 /// This protocol defines the minimal interface that classes need to implement to
 /// interact with Mantle adapters.
@@ -48,7 +53,7 @@ typedef enum : NSUInteger {
 ///                   (like a KVC validation error).
 ///
 /// Returns an initialized model object, or nil if validation failed.
-+ (instancetype)modelWithDictionary:(NSDictionary *)dictionaryValue error:(NSError **)error;
++ (nullable instancetype)modelWithDictionary:(nullable NSDictionary<NSString *, id> *)dictionaryValue error:(NSError **)error NS_SWIFT_UNAVAILABLE("Use MTLModelProtocol.init(dictionary:)");
 
 /// A dictionary representing the properties of the receiver.
 ///
@@ -56,7 +61,7 @@ typedef enum : NSUInteger {
 /// with any nil values represented by NSNull.
 ///
 /// This property must never be nil.
-@property (nonatomic, copy, readonly) NSDictionary *dictionaryValue;
+@property (nonatomic, copy, readonly) NSDictionary<NSString *, id> *dictionaryValue;
 
 /// Initializes the receiver using key-value coding, setting the keys and values
 /// in the given dictionary.
@@ -74,7 +79,7 @@ typedef enum : NSUInteger {
 ///                   (like a KVC validation error).
 ///
 /// Returns an initialized model object, or nil if validation failed.
-- (instancetype)initWithDictionary:(NSDictionary *)dictionaryValue error:(NSError **)error;
+- (nullable instancetype)initWithDictionary:(nullable NSDictionary<NSString *, id> *)dictionaryValue error:(NSError **)error;
 
 /// Merges the value of the given key on the receiver with the value of the same
 /// key from the given model object, giving precedence to the other model object.
@@ -82,7 +87,7 @@ typedef enum : NSUInteger {
 
 /// Returns the keys for all @property declarations, except for `readonly`
 /// properties without ivars, or properties on MTLModel itself.
-+ (NSSet *)propertyKeys;
++ (NSSet<NSString *> *)propertyKeys;
 
 /// Validates the model.
 ///
@@ -99,26 +104,7 @@ typedef enum : NSUInteger {
 ///
 /// The default implementations of <NSCopying>, -hash, and -isEqual: make use of
 /// the +propertyKeys method.
-@interface MTLModel : NSObject <MTLModel>
-
-/// Initializes the receiver using key-value coding, setting the keys and values
-/// in the given dictionary.
-///
-/// dictionaryValue - Property keys and values to set on the receiver. Any NSNull
-///                   values will be converted to nil before being used. KVC
-///                   validation methods will automatically be invoked for all of
-///                   the properties given. If nil, this method is equivalent to
-///                   -init.
-/// error           - If not NULL, this may be set to any error that occurs
-///                   (like a KVC validation error).
-///
-/// Returns an initialized model object, or nil if validation failed.
-- (instancetype)initWithDictionary:(NSDictionary *)dictionaryValue error:(NSError **)error;
-
-/// Initializes the receiver with default values.
-///
-/// This is the designated initializer for this class.
-- (instancetype)init;
+@interface MTLModel : NSObject <MTLModel, NSSecureCoding>
 
 /// By default, this method looks for a `-merge<Key>FromModel:` method on the
 /// receiver, and invokes it if found. If not found, and `model` is not nil, the
@@ -157,7 +143,7 @@ typedef enum : NSUInteger {
 /// The default implementation is based on the receiver's class and all its
 /// properties for which +storageBehaviorForPropertyWithKey: returns
 /// MTLPropertyStoragePermanent.
-- (NSString *)description;
+@property (readonly, copy) NSString *description;
 
 @end
 
@@ -177,3 +163,5 @@ typedef enum : NSUInteger {
 - (BOOL)validate:(NSError **)error;
 
 @end
+
+NS_ASSUME_NONNULL_END

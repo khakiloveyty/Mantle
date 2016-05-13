@@ -25,3 +25,7 @@ FOUNDATION_EXPORT const unsigned char MantleVersionString[];
 #import <Mantle/NSObject+MTLComparisonAdditions.h>
 #import <Mantle/NSValueTransformer+MTLInversionAdditions.h>
 #import <Mantle/NSValueTransformer+MTLPredefinedTransformerAdditions.h>
+
+@interface MTLJSONAdapter ()
+- (nonnull instancetype)initWithModelClass:(nonnull Class)modelClass _opaque_JSONKeyPathsByPropertyKey:(nonnull id)JSONKeyPathsByPropertyKey NS_DESIGNATED_INITIALIZER NS_REFINED_FOR_SWIFT;
+@end
